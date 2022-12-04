@@ -13,3 +13,4 @@ export const defined = <T>(t: T | undefined | null): t is T => t !== undefined &
 export const add = (a: number, b: number) => a + b;
 
 export const mult = (a: number) => (b: number) => a * b;
+export const fparseInt = (a: string) => parseInt(a);
