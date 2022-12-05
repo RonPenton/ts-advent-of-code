@@ -11,6 +11,16 @@ export function readFile(inputFileName: string) {
 
 export const defined = <T>(t: T | undefined | null): t is T => t !== undefined && t !== null;
 export const add = (a: number, b: number) => a + b;
+export const addC = (a: number) => (b: number) => a + b;
 
 export const mult = (a: number) => (b: number) => a * b;
 export const fparseInt = (a: string) => parseInt(a);
+
+export const range = (a: number, b?: number): number[] => {
+    if (!b) {
+        b = a;
+        a = 0;
+    }
+
+    return [...Array(b - a).keys()].map(addC(a));
+}
