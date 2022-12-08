@@ -31,13 +31,7 @@ directions.forEach(d => {
     rows.forEach(r => row(r)(forest)[reducer(d)]((max, height, c) => comp(r, c, max, height), 0));
     cols.forEach(c => col(c)(forest)[reducer(d)]((max, height, r) => comp(r, c, max, height), 0));
 });
-rows.forEach(r => {
-    visibles.add(coord(r, 0));
-    visibles.add(coord(r, cols.at(-1)!));
-});
-cols.forEach(c => {
-    visibles.add(coord(0, c));
-    visibles.add(coord(rows.at(-1)!, c));
-});
+[0, cols.length - 1].forEach(c => rows.forEach(r => visibles.add(coord(r, c))));
+[0, rows.length - 1].forEach(r => cols.forEach(c => visibles.add(coord(r, c))));
 
 console.log(visibles.size);
