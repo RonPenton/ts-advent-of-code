@@ -1,3 +1,4 @@
+//https://adventofcode.com/2022/day/3
 import { add, defined, readLines } from "../../utils";
 const lines = readLines(`${__dirname}\\01-input.txt`);
 

@@ -1,3 +1,4 @@
+//https://adventofcode.com/2022/day/7
 import { add, readLines } from "../../utils";
 const commands = readLines(`${__dirname}\\01-input.txt`);
 
@@ -32,32 +33,29 @@ const findFile = (dir: Dir, name: string, size: number) => {
     return file;
 }
 
-type State = { stack: Dir[], path: string[] };
-
-const cd = ({ stack, path }: State, param: string): State => {
+const cd = (stack: Dir[], param: string): Dir[] => {
     const [head, ...tail] = stack;
-    const [_, ...ptail] = param;
     if (param == '/')
-        return { stack: [stack.at(-1)!], path: [param] }
+        return [stack.at(-1)!];
     if (param == '..')
-        return { stack: tail, path: ptail };
+        return tail;
     const sub = findDir(head, param);
-    return { stack: [sub, ...stack], path: [param, ...path] };
+    return [sub, ...stack];
 }
 
-const dir = ({ stack, path }: State, param: string): State => {
+const dir = (stack: Dir[], param: string): Dir[] => {
     const [head] = stack;
     findDir(head, param);
-    return { stack, path };
+    return stack;
 }
 
-const file = ({ stack, path }: State, file: string, size: number) => {
+const file = (stack: Dir[], file: string, size: number) => {
     const [head] = stack;
     findFile(head, file, size);
-    return { stack, path };
+    return stack;
 }
 
-const processLine = (line: string, { stack, path }: State) => {
+const processLine = (line: string, stack: Dir[]) => {
 
     const { lineType, resp } = lineTypes
         .map(lineType => ({ lineType, resp: lineRegs[lineType].exec(line) }))
@@ -67,10 +65,10 @@ const processLine = (line: string, { stack, path }: State) => {
     const [_, p1, p2] = resp;
 
     switch (lineType) {
-        case 'ls': return { stack, path };
-        case 'cd': return cd({ stack, path }, p1);
-        case 'dir': return dir({ stack, path }, p1);
-        case 'file': return file({ stack, path }, p2, parseInt(p1));
+        case 'ls': return stack;
+        case 'cd': return cd(stack, p1);
+        case 'dir': return dir(stack, p1);
+        case 'file': return file(stack, p2, parseInt(p1));
     }
 }
 
@@ -84,7 +82,7 @@ const bfs = (dir: Dir): Dir[] => {
 
 const root: Dir = { name: '/', files: [], dirs: [] };
 
-commands.reduce((state, line) => processLine(line, state), { stack: [root], path: ['/'] });
+commands.reduce((stack, line) => processLine(line, stack), [root]);
 
 const sizes = bfs(root).map(size).filter(s => s < 100000);
 const answer = sizes.reduce(add, 0);

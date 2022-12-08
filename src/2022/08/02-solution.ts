@@ -1,3 +1,4 @@
+//https://adventofcode.com/2022/day/8
 import { Coord, fparseInt, gridMap, mult, range, readLines } from "../../utils";
 const lines = readLines(`${__dirname}\\01-input.txt`);
 

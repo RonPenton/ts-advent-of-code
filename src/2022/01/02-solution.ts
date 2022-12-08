@@ -1,3 +1,4 @@
+//https://adventofcode.com/2022/day/1
 import fs from 'fs';
 
 const inputFileName = `${__dirname}\\01-input.txt`;
