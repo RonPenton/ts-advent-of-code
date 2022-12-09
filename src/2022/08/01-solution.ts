@@ -36,3 +36,5 @@ directions.forEach(d => {
 [0, rows.length - 1].forEach(r => cols.forEach(c => visibles.add(coord(r, c))));
 
 console.log(visibles.size);
+
+Object.fromEntries()

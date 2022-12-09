@@ -65,3 +65,9 @@ export function takeWhile<T>(array: T[], f: ArrayPredicate<T, boolean>): T[] {
     return a;
 }
 
+export const addCoord = ([r1, c1]: Coord, [r2, c2]: Coord): Coord => [r1 + r2, c1 + c2];
+export const subCoord = ([r1, c1]: Coord, [r2, c2]: Coord): Coord => [r1 - r2, c1 - c2];
+const ads = (a: number, b: number) => Math.pow(Math.abs(a - b), 2);
+export const distCoord = ([r1, c1]: Coord, [r2, c2]: Coord): number => Math.sqrt(ads(r1, r2) + ads(c1, c2));
+export const multCoord = ([r1, c1]: Coord, [r2, c2]: Coord): Coord => [r1 * r2, c1 * c2];
+export const multCoordV = ([r1, c1]: Coord, v: number): Coord => [r1 * v, c1 * v];
