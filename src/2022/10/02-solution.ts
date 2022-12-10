@@ -23,7 +23,6 @@ const group = (array: number[], size: number) => {
     return range(groups).map(g => array.slice(g * size, g * size + size));
 }
 
-const signal = lines.flatMap(parse).reduce<number[]>(reducer, [1, 1]).reverse();
-signal.shift();
+const signal = lines.flatMap(parse).reduce(reducer, [1]).reverse();
 const groups = group(signal, 40).map(g => g.map(on).map(render).join(''));
 groups.forEach(x => console.log(x));
