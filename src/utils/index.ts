@@ -71,3 +71,8 @@ const ads = (a: number, b: number) => Math.pow(Math.abs(a - b), 2);
 export const distCoord = ([r1, c1]: Coord, [r2, c2]: Coord): number => Math.sqrt(ads(r1, r2) + ads(c1, c2));
 export const multCoord = ([r1, c1]: Coord, [r2, c2]: Coord): Coord => [r1 * r2, c1 * c2];
 export const multCoordV = ([r1, c1]: Coord, v: number): Coord => [r1 * v, c1 * v];
+
+
+export function keysOf<T extends {}>(t: T): (keyof T)[] {
+    return Object.keys(t) as any;
+}
