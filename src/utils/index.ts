@@ -10,6 +10,7 @@ export function readFile(inputFileName: string) {
 }
 
 export const defined = <T>(t: T | undefined | null): t is T => t !== undefined && t !== null;
+export const notEmpty = <T>(t: T | undefined | null): t is T => !!t;
 export const add = (a: number, b: number) => a + b;
 export const addC = (a: number) => (b: number) => a + b;
 
@@ -76,3 +77,6 @@ export const multCoordV = ([r1, c1]: Coord, v: number): Coord => [r1 * v, c1 * v
 export function keysOf<T extends {}>(t: T): (keyof T)[] {
     return Object.keys(t) as any;
 }
+
+export const sortNumber = (a: number, b: number) => a - b;
+export const sortNumberRev = (a: number, b: number) => b - a;
