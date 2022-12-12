@@ -41,8 +41,7 @@ const bfs = (grid: Node[][], starts: Coord[], end: Coord) => {
     const marked = new Map<string, number>(starts.map(x => [coord(x), 0]));
     const looking: Coord[] = [...starts];
 
-    let current: Coord | undefined = start;
-    let length = 0;
+    let current: Coord | undefined = looking.pop()!;
     marked.set(coord(current), length);
 
     while (current) {
