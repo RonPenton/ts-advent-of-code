@@ -56,6 +56,18 @@ export function gridFind<T>(g: T[][], f: GridPredicate<T, boolean>) {
     return coord;
 }
 
+export function gridFilter<T>(g: T[][], f: GridPredicate<T, boolean>) {
+    const coords: Coord[] = [];
+    g.forEach((row, r) => row.forEach((val, c) => {
+        if (f(r, c, val, g)) {
+            coords.push([r, c]);
+        }
+    }));
+
+    return coords;
+}
+
+
 export type ArrayPredicate<T, R = void> = (value: T, index: number, array: T[]) => R;
 export function takeWhile<T>(array: T[], f: ArrayPredicate<T, boolean>): T[] {
     const a: T[] = [];
