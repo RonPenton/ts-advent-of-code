@@ -5,7 +5,7 @@ const lines = readLines(`${__dirname}\\01-input.txt`);
 type Node = {
     location: Coord;
     height: number;
-    exits: (Coord | null)[];
+    exits: Coord[];
     trait: string;
 }
 
@@ -24,15 +24,14 @@ type GetDir = ReturnType<typeof getDir>;
 const node = (g: GetDir, r: number, c: number, s: string): Node => ({
     location: [r, c],
     height: num(getHeight(s)),
-    exits: range(4).map(d => g(d, [r, c])),
+    exits: range(4).map(d => g(d, [r, c])).filter(defined),
     trait: s
 });
 
 const initialGrid = lines.map(l => Array.from(l));
 const height = initialGrid.length;
 const width = initialGrid[0].length;
-const $getDir = getDir(height, width);
-const grid = gridMap(initialGrid, (r, c, v) => node($getDir, r, c, v));
+const grid = gridMap(initialGrid, (r, c, v) => node(getDir(height, width), r, c, v));
 
 const { coord: start } = gridFind(grid, (_, __, v) => v.trait == 'S')!;
 const { coord: end } = gridFind(grid, (_, __, v) => v.trait == 'E')!;
@@ -42,19 +41,15 @@ const bfs = (grid: Node[][], starts: Coord[], end: Coord) => {
     const looking: Coord[] = [...starts];
 
     let current: Coord | undefined = looking.pop()!;
-    marked.set(coord(current), length);
-
     while (current) {
         const length = marked.get(coord(current))!;
         const c = grid[current[0]][current[1]];
-        const exits = c.exits
-            .filter(defined)
-            .filter(e => grid[e[0]][e[1]].height - c.height <= 1);
+        const exits = c.exits.filter(e => grid[e[0]][e[1]].height - c.height <= 1);
 
         for (const exit of exits) {
             const m = coord(exit);
             if (!marked.has(m)) {
-                marked.set(coord(exit), length + 1);
+                marked.set(m, length + 1);
                 looking.push(exit);
             }
         }
