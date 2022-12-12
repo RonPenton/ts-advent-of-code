@@ -37,9 +37,9 @@ const grid = gridMap(initialGrid, (r, c, v) => node($getDir, r, c, v));
 const { coord: start } = gridFind(grid, (_, __, v) => v.trait == 'S')!;
 const { coord: end } = gridFind(grid, (_, __, v) => v.trait == 'E')!;
 
-const bfs = (grid: Node[][], start: Coord, end: Coord) => {
-    const marked = new Map<string, number>();
-    const looking: Coord[] = [];
+const bfs = (grid: Node[][], starts: Coord[], end: Coord) => {
+    const marked = new Map<string, number>(starts.map(x => [coord(x), 0]));
+    const looking: Coord[] = [...starts];
 
     let current: Coord | undefined = start;
     let length = 0;
@@ -63,9 +63,8 @@ const bfs = (grid: Node[][], start: Coord, end: Coord) => {
         current = looking.shift();
     }
 
-    return marked.get(coord(end));
+    console.log(marked.get(coord(end)));
 }
 
 const starts = gridFilter(grid, (_, __, v) => v.height == 1);
-const lengths = starts.map(s => bfs(grid, s, end)).filter(defined);
-console.log(Math.min(...lengths))
+bfs(grid, starts, end);
