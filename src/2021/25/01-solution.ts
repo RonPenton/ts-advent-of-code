@@ -3,22 +3,20 @@ import { Coord, readLines } from "../../utils";
 import { GridPredicate, Grid, Direction, moveCoord } from "../../utils/grid";
 const lines = readLines(`${__dirname}\\01-input.txt`);
 
-type Square = 'v' | '>' | '.';
+type Cucumber = 'v' | '>';
+type Square = Cucumber | '.';
+const Dirs = { 'v': 'down', '>': 'right' } as const;
+const isCucumber = (o: any): o is Cucumber => Object.keys(Dirs).includes(o);
+type G = Grid<Square>;
 
-const grid = new Grid<Square>(lines.map(l => Array.from(l) as Square[]));
-
-const mover = (symbol: Square, dir: Direction): GridPredicate<Square, boolean> => (x, r, c, g) => {
+const mover = (symbol: Cucumber, dir: Direction): GridPredicate<Square, boolean> => (x, r, c, g) => {
     return x == symbol && g.atWrap(moveCoord([r, c], dir)) == '.';
 }
-
-const Dirs = { 'v': 'down', '>': 'right' } as const;
-type Cucumber = keyof typeof Dirs;
-const isCucumber = (o: any): o is Cucumber => Object.keys(Dirs).includes(o);
 
 const easters = mover('>', Dirs['>']);
 const downers = mover('v', Dirs['v']);
 
-const move = (g: Grid<Square>) => (c: Coord) => {
+const move = (g: G) => (c: Coord) => {
     const clone = g.slice();
     const at = clone.at(c)!;
     if (isCucumber(at)) {
@@ -29,7 +27,7 @@ const move = (g: Grid<Square>) => (c: Coord) => {
     return clone;
 }
 
-const turn = (grid: Grid<Square>) => {
+const turn = (grid: G) => {
     const e = grid.filter(easters).map(x => x.coord);
     grid = e.reduce((g, m) => move(g)(m), grid);
     const d = grid.filter(downers).map(x => x.coord);
@@ -39,14 +37,16 @@ const turn = (grid: Grid<Square>) => {
     return { grid, moves };
 }
 
-let m = 0;
-let g = grid;
-let step = 0;
-do {
-    const { grid, moves } = turn(g);
-    g = grid;
-    m = moves;
-    step++;
-} while (m > 0)
+const grid = new Grid<Square>(lines.map(l => Array.from(l) as Square[]));
 
-console.log(step);
+const step = (g: G, steps = 0): number => {
+    const { grid, moves } = turn(g);
+    if (moves == 0) {
+        return steps;
+    }
+    return step(grid, steps + 1);
+}
+
+const s = step(grid);
+
+console.log(s);
