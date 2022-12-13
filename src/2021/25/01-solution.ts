@@ -1,5 +1,5 @@
 //https://adventofcode.com/2021/day/25
-import { Coord, readLines } from "../../utils";
+import { Coord, identity, readLines } from "../../utils";
 import { GridPredicate, Grid, Direction, moveCoord } from "../../utils/grid";
 const lines = readLines(`${__dirname}\\01-input.txt`);
 
@@ -48,5 +48,4 @@ const step = (g: G, steps = 0): number => {
 }
 
 const s = step(grid);
-
 console.log(s);

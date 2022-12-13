@@ -94,16 +94,7 @@ export class Grid<T> {
     }
 
     public slice(r1?: number, c1?: number, r2?: number, c2?: number): Grid<T> {
-        const fix = (val1: number | undefined, val2: number | undefined, max: number) => {
-            val1 = val1 && val1 < 0 ? max + val1 : val1 ?? 0;
-            val2 = val2 && val2 < 0 ? max + val2 : val2 ?? max;
-            const [a1, a2] = [val1, val2].sort((a, b) => a - b);
-            return [a1, a2] as const;
-        }
-
-        const [rx, ry] = fix(r1, r2, this.height);
-        const [cx, cy] = fix(c1, c2, this.width);
-        const g = this.grid.slice(rx, ry).map(row => row.slice(cx, cy));
+        const g = this.grid.slice(r1, r2).map(row => row.slice(c1, c2));
         return new Grid(g);
     }
 
@@ -129,5 +120,9 @@ export class Grid<T> {
         if (r < 0 || c < 0 || r > this.height || c > this.width)
             return false;
         return true;
+    }
+
+    public print(predicate: GridPredicate<T, string>) {
+        console.log(this.grid.map((row, r) => row.map((val, c) => predicate(val, r, c, this)).join('')).join('\n'));
     }
 }

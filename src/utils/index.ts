@@ -92,3 +92,5 @@ export function keysOf<T extends {}>(t: T): (keyof T)[] {
 
 export const sortNumber = (a: number, b: number) => a - b;
 export const sortNumberRev = (a: number, b: number) => b - a;
+
+export function identity<T>(a: T) { return a };
