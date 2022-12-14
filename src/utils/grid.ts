@@ -2,14 +2,16 @@ import { range } from ".";
 
 export type Coord = [r: number, c: number];
 
-export const Directions = ['up', 'down', 'left', 'right'] as const;
+export const Directions = ['up', 'down', 'left', 'right', 'downright', 'downleft'] as const;
 export type Direction = typeof Directions[number];
 
 const deltas: Record<Direction, Coord> = {
     'up': [-1, 0],
     'down': [1, 0],
     'left': [0, -1],
-    'right': [0, 1]
+    'right': [0, 1],
+    'downright': [1, 1],
+    'downleft': [1, -1]
 };
 
 export const moveCoord = (c: Coord, dir: Direction): Coord => {
@@ -23,6 +25,23 @@ export const distCoord = ([r1, c1]: Coord, [r2, c2]: Coord): number => Math.sqrt
 export const multCoord = ([r1, c1]: Coord, [r2, c2]: Coord): Coord => [r1 * r2, c1 * c2];
 export const scaleCoord = ([r1, c1]: Coord, v: number): Coord => [r1 * v, c1 * v];
 
+export const printCoord = ([r, c]: Coord) => `${r},${c}`;
+
+export const iterateOrthogonal = ([r1, c1]: Coord, [r2, c2]: Coord, predicate: (c: Coord) => void) => {
+    if (r1 != r2 && c1 != c2)
+        throw new Error(`Points [${r1},${c1}] and [${r2},${c2}] are not orthogonal`);
+
+    const dr = Math.sign(r2 - r1);
+    const dc = Math.sign(c2 - c1);
+    let r = r1;
+    let c = c1;
+    while (!(r == r2 && c == c2)) {
+        predicate([r, c]);
+        r += dr;
+        c += dc;
+    }
+    predicate([r, c]);
+}
 
 export type GridPredicate<T, R = void> = (val: T, r: number, c: number, g: Grid<T>) => R;
 
@@ -32,6 +51,14 @@ export type GridEntry<T> = {
 }
 
 export class Grid<T> {
+
+    public static from<T>(r: number, c: number, fill: T) {
+        const rows = Array(r);
+        for (let i = 0; i < r; i++) {
+            rows[i] = Array(c).fill(fill);
+        }
+        return new Grid<T>(rows);
+    }
 
     constructor(items: T[][]) {
         this.grid = items;
