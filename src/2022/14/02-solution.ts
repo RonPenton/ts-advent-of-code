@@ -1,6 +1,6 @@
 //https://adventofcode.com/2022/day/14
-import { add, Coord, defined, fparseInt, identity, readFile, readLines } from "../../utils";
-import { Direction, Grid, iterateOrthogonal, moveCoord, printCoord } from "../../utils/grid";
+import { Coord, defined, fparseInt, identity, readLines } from "../../utils";
+import { Direction, Grid, iterateOrthogonal, moveCoord } from "../../utils/grid";
 const lines = readLines(`${__dirname}\\01-input.txt`);
 
 type Line = [Coord, Coord];
@@ -49,5 +49,5 @@ while (simulateMove(start) != 0) {
     count++;
 }
 
-grid.slice(0, 470, height + 3, 550).print(identity);
+grid.slice(0, 420, height + 3, 580).print(identity);
 console.log(count + 1);
