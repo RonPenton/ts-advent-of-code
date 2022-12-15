@@ -22,6 +22,8 @@ export const addCoord = ([r1, c1]: Coord, [r2, c2]: Coord): Coord => [r1 + r2, c
 export const subCoord = ([r1, c1]: Coord, [r2, c2]: Coord): Coord => [r1 - r2, c1 - c2];
 const ads = (a: number, b: number) => Math.pow(Math.abs(a - b), 2);
 export const distCoord = ([r1, c1]: Coord, [r2, c2]: Coord): number => Math.sqrt(ads(r1, r2) + ads(c1, c2));
+export const rectilinear = ([r1, c1]: Coord, [r2, c2]: Coord): number => Math.abs(r1 - r2) + Math.abs(c1 - c2);
+export const eqCoord = ([r1, c1]: Coord, [r2, c2]: Coord): boolean => r1 == r2 && c1 == c2;
 export const multCoord = ([r1, c1]: Coord, [r2, c2]: Coord): Coord => [r1 * r2, c1 * c2];
 export const scaleCoord = ([r1, c1]: Coord, v: number): Coord => [r1 * v, c1 * v];
 
@@ -42,6 +44,26 @@ export const iterateOrthogonal = ([r1, c1]: Coord, [r2, c2]: Coord, predicate: (
     }
     predicate([r, c]);
 }
+
+export const iterateDiagonal = ([r1, c1]: Coord, [r2, c2]: Coord, predicate: (c: Coord) => void) => {
+    const rz = Math.abs(r2 - r1);
+    const cz = Math.abs(c2 - c1);
+
+    if (rz != cz)
+        throw new Error(`Points [${r1},${c1}] and [${r2},${c2}] are not diagonal`);
+
+    const dr = Math.sign(r2 - r1);
+    const dc = Math.sign(c2 - c1);
+    let r = r1;
+    let c = c1;
+    while (!(r == r2 && c == c2)) {
+        predicate([r, c]);
+        r += dr;
+        c += dc;
+    }
+    predicate([r, c]);
+}
+
 
 export type GridPredicate<T, R = void> = (val: T, r: number, c: number, g: Grid<T>) => R;
 
