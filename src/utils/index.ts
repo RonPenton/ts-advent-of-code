@@ -94,3 +94,7 @@ export const sortNumber = (a: number, b: number) => a - b;
 export const sortNumberRev = (a: number, b: number) => b - a;
 
 export function identity<T>(a: T) { return a };
+
+export const union = <T>(a: Set<T>, b: Set<T>) => new Set<T>([...a, ...b]);
+export const intersection = <T>(a: Set<T>, b: Set<T>) => new Set<T>([...a].filter(x => b.has(x)));
+export const difference = <T>(a: Set<T>, b: Set<T>) => new Set<T>([...a].filter(x => !b.has(x)));
