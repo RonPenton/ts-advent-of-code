@@ -27,6 +27,8 @@ export const eqCoord = ([r1, c1]: Coord, [r2, c2]: Coord): boolean => r1 == r2 &
 export const multCoord = ([r1, c1]: Coord, [r2, c2]: Coord): Coord => [r1 * r2, c1 * c2];
 export const scaleCoord = ([r1, c1]: Coord, v: number): Coord => [r1 * v, c1 * v];
 
+export const translate = ([tr, tc]: Coord) => ([r, c]: Coord): Coord => [tr + r, tc + c];
+
 export const printCoord = ([r, c]: Coord) => `${r},${c}`;
 
 export const iterateOrthogonal = ([r1, c1]: Coord, [r2, c2]: Coord, predicate: (c: Coord) => void) => {
@@ -151,6 +153,10 @@ export class Grid<T> {
         return this.grid.at(r)?.at(c);
     }
 
+    public rowAt(r: number) {
+        return this.grid.at(r);
+    }
+
     public wrap([r, c]: Coord): Coord {
         r = ((r % this.height) + this.height) % this.height;
         c = ((c % this.width) + this.width) % this.width;
@@ -169,6 +175,16 @@ export class Grid<T> {
         if (r < 0 || c < 0 || r > this.height || c > this.width)
             return false;
         return true;
+    }
+
+    public growRows(rows: number, fill: T) {
+        for (let r = 0; r < rows; r++) {
+            this.grid.push(Array(this.width).fill(fill));
+        }
+    }
+
+    public sliceRows(rowsStart: number, rowsEnd?: number) {
+        return new Grid(this.grid.slice(rowsStart, rowsEnd));
     }
 
     public print(predicate: GridPredicate<T, string>) {
