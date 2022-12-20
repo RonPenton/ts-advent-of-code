@@ -107,21 +107,20 @@ const runFactory = (factory: Factory, i: number) => {
             potentials = potentials.filter(([m]) => m == 'geode');
         }
 
-        let localMax = geodes;
-        for (const [m, q] of potentials) {
+        const localMaxes = potentials.flatMap(([m, q]) => {
             const time = q! + 1;
             const materials = sub(add(factory.materials, mul(factory.robits, time)), factory.blueprint[m]);
             const robits = add(factory.robits, quantity([[m, 1]]));
-            const mx = nextBuild({
+            return nextBuild({
                 factory: { ...factory, materials, robits },
                 builds: [...builds, m],
                 geodes: m == 'geode' ? geodes + (left - time) : geodes
             }, left - time);
-            if (mx > localMax)
-                localMax = mx;
-        }
+        });
 
-        return localMax;
+        if (localMaxes.length == 0) return geodes;
+
+        return Math.max(...localMaxes);
     }
 
     return nextBuild({ factory, builds: [], geodes: 0 }, 32);
