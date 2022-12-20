@@ -102,7 +102,26 @@ export const difference = <T>(a: Set<T>, b: Set<T>) => new Set<T>([...a].filter(
 let d = 0;
 export const debug = (s: string) => {
     d++;
-    if (d % 100 == 0) {
+    if (d % 100000 == 0) {
         console.log(s);
     }
+}
+
+export type Pair<T> = [T, T];
+export const pairs = <T>(a: T[]): [T, T][] => {
+    const p: [T, T][] = [];
+    for (let i = 0; i < a.length; i += 2)
+        p[i / 2] = [a[i], a[i + 1]];
+    return p;
+}
+
+export const fromEntries = <K extends PropertyKey, V>(entries: Iterable<readonly [K, V]>): Partial<Record<K, V>> => {
+    return Object.fromEntries(entries) as Record<K, V>;
+}
+export const entries = <K extends PropertyKey, V>(record: Record<K, V> | Partial<Record<K, V>>): [K, V][] => {
+    return Object.entries(record) as [K, V][];
+}
+
+export const full = <K extends keyof any, V>(keys: readonly K[], record: Partial<Record<K, V>>): record is Record<K, V> => {
+    return keys.every(k => Object.hasOwn(record, k));
 }
