@@ -74,22 +74,24 @@ const hash = (board: Grid<P>) => {
 let rock = 0;
 let move = 0;
 const total = 1000000000000;
+let cycleFound = false;
 while (rock < total) {
-
-    let left = total - rock;
 
     const key = memoKey(rock, move, board);
     const m = patterns.get(key);
-    if (m) {
-        const [mrocks, mheight] = m;
-        const h = (board.height + bottom) - mheight;
-        const l = mrocks - left;
-        bottom += (Math.floor(left / l)) * h;
-        left = left % l;
-        rock = -(left - total);
+    if (!cycleFound && m) {
+        cycleFound = true;
+        const [lastrock, mheight] = m;
+        const cycleHeight = (board.height + bottom) - mheight;
+        const cycleLength = rock - lastrock;
+        const left = total - rock;
+        const cycles = Math.floor(left / cycleLength);
+        bottom += cycles * cycleHeight;
+        const remainder = left % cycleLength;
+        rock = total - remainder;
     }
-    else if (rock > 0) {
-        patterns.set(key, [left, (board.height + bottom)]);
+    else if (!cycleFound && rock > 0) {
+        patterns.set(key, [rock, (board.height + bottom)]);
     }
 
     const t = highestRock(board);
