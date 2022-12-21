@@ -125,3 +125,37 @@ export const entries = <K extends PropertyKey, V>(record: Record<K, V> | Partial
 export const full = <K extends keyof any, V>(keys: readonly K[], record: Partial<Record<K, V>>): record is Record<K, V> => {
     return keys.every(k => Object.hasOwn(record, k));
 }
+
+export function findIterable<T, S extends T>(iterable: IterableIterator<T>, predicate: (value: T, index: number) => value is S): S | undefined;
+export function findIterable<T>(iterable: IterableIterator<T>, predicate: (value: T, index: number) => unknown): T | undefined;
+export function findIterable<T>(iterable: IterableIterator<T>, predicate: (value: T, index: number) => unknown) {
+    let next = iterable.next();
+    let idx = 0;
+
+    while (!next.done) {
+        if (predicate(next.value, idx)) {
+            return next.value;
+        }
+
+        idx++;
+        next = iterable.next();
+    }
+
+    return undefined;
+}
+
+export function filterIterable<T, S extends T>(iterable: IterableIterator<T>, predicate: (value: T, index: number) => value is S): Generator<S, void, unknown>;
+export function filterIterable<T>(iterable: IterableIterator<T>, predicate: (value: T, index: number) => unknown): Generator<T, void, unknown>;
+export function* filterIterable<T>(iterable: IterableIterator<T>, predicate: (value: T, index: number) => unknown) {
+    let next = iterable.next();
+    let idx = 0;
+
+    while (!next.done) {
+        if (predicate(next.value, idx)) {
+            yield next.value;
+        }
+
+        idx++;
+        next = iterable.next();
+    }
+}
