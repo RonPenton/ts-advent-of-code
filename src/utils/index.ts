@@ -159,3 +159,14 @@ export function* filterIterable<T>(iterable: IterableIterator<T>, predicate: (va
         next = iterable.next();
     }
 }
+
+export function* mapIterable<T, U>(iterable: IterableIterator<T>, mapper: (value: T, index: number) => U) {
+    let next = iterable.next();
+    let idx = 0;
+
+    while (!next.done) {
+        yield mapper(next.value, idx)
+        idx++;
+        next = iterable.next();
+    }
+}

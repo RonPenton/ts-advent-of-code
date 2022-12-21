@@ -1,4 +1,4 @@
-import { range } from ".";
+import { identity, range } from ".";
 
 export type Coord = [r: number, c: number];
 
@@ -183,11 +183,44 @@ export class Grid<T> {
         }
     }
 
+    public growCols(cols: number, fill: T) {
+        for (let r = 0; r < this.height; r++) {
+            this.grid[r].push(...Array(cols).fill(fill));
+        }
+    }
+
     public sliceRows(rowsStart: number, rowsEnd?: number) {
         return new Grid(this.grid.slice(rowsStart, rowsEnd));
     }
 
     public print(predicate: GridPredicate<T, string>) {
         console.log(this.grid.map((row, r) => row.map((val, c) => predicate(val, r, c, this)).join('')).join('\n'));
+    }
+
+    public flipVertical(): Grid<T> {
+        const g = this.grid.slice().map(row => row.slice());
+        g.reverse();
+        return new Grid(g);
+    }
+
+    public flipHorizontal(): Grid<T> {
+        const g = this.grid.slice().map(row => row.slice().reverse());
+        return new Grid(g);
+    }
+
+    public rotateRight(): Grid<T> {
+
+        const nh = this.width;
+        const nw = this.height;
+
+        const rows = Array(nh);
+        for (let r = 0; r < nh; r++) {
+            rows[r] = Array(nw);
+            for (let c = 0; c < nw; c++) {
+                rows[r][c] = this.at([this.height - (c + 1), r]);
+            }
+        }
+
+        return new Grid<T>(rows);
     }
 }
