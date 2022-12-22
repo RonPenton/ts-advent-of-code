@@ -168,35 +168,21 @@ const match = (_: Bit, r: number, c: number, g: Grid<Bit>) => {
         .map((n, i) => n & checkPatterns[i])
         .every((n, i) => n == checkPatterns[i]);
 
-    if(a == true) {
-        console.log([r,c]);
+    if (a == true) {
+        console.log([r, c]);
     }
 
     return a;
 }
 
-let g = bigGrid.slice();
-let matches = g.filter(match);
-let rot = 0;
-while (matches.length == 0 && rot < 4) {
+const [g, matches] = range(4).flatMap(n => {
+    let g = bigGrid.slice();
+    for (let i = 0; i < n; i++) {
+        g = g.rotateRight();
+    }
 
-    const o = g;
-
-    g = o.flipHorizontal();
-    matches = g.filter(match);
-    if (matches.length > 0)
-        break;
-
-    g = o.flipVertical();
-    matches = g.filter(match);
-    if (matches.length > 0)
-        break;
-
-    g = o.rotateRight();
-    matches = g.filter(match);
-
-    rot++;
-}
+    return [g, g.flipHorizontal(), g.flipVertical()];
+}).map(g => [g, g.filter(match)] as const).find(([g, m]) => m.length > 0)!;
 
 console.log(matches.length);
 
@@ -217,8 +203,10 @@ for (const [r, c] of m) {
 
 copy = copy.map((v) => v == '0' ? '.' : v == '1' ? '#' : 'O');
 
+const ohashes = g.filter(x => x == '1').length;
 const hashes = copy.filter(x => x == '#').length;
 const os = copy.filter(x => x == 'O').length;
 
 console.log(hashes);
-copy.print(identity);
+//copy.print(identity);
+g.map(v => v == '0' ? '.' : v == '1' ? '#' : 'O').print(identity);
