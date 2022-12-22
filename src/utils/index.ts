@@ -23,6 +23,10 @@ export const range = (a: number, b?: number): number[] => {
         a = 0;
     }
 
+    if (a > b) {
+        return [...Array(a - b).keys()].map(addC(b)).reverse();
+    }
+
     return [...Array(b - a).keys()].map(addC(a));
 }
 

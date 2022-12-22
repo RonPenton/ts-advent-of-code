@@ -1,21 +1,25 @@
-import { identity, range } from ".";
-
 export type Coord = [r: number, c: number];
 
-export const Directions = ['up', 'down', 'left', 'right', 'downright', 'downleft'] as const;
+export const Directions = ['up', 'upright', 'right', 'downright', 'down', 'downleft', 'left', 'upleft'] as const;
 export type Direction = typeof Directions[number];
 
-const deltas: Record<Direction, Coord> = {
+export const Deltas: Record<Direction, Coord> = {
     'up': [-1, 0],
     'down': [1, 0],
     'left': [0, -1],
     'right': [0, 1],
     'downright': [1, 1],
-    'downleft': [1, -1]
+    'downleft': [1, -1],
+    'upright': [-1, 1],
+    'upleft': [-1, -1]
 };
 
+export const rotate = (dir: Direction, amt: -135 | -90 | -45 | 0 | 45 | 90 | 135 | 180) => {
+    return Directions[(Directions.indexOf(dir) + (amt / 45) + Directions.length) % Directions.length];
+}
+
 export const moveCoord = (c: Coord, dir: Direction): Coord => {
-    return addCoord(c, deltas[dir]);
+    return addCoord(c, Deltas[dir]);
 }
 
 export const addCoord = ([r1, c1]: Coord, [r2, c2]: Coord): Coord => [r1 + r2, c1 + c2];
@@ -110,7 +114,7 @@ export class Grid<T> {
         return new Grid(this.grid.map((row, r) => row.map((val, c) => callbackfn(val, r, c, this))));
     }
 
-    public filter<S extends T>(predicate: (value: T, r: number, c: number, g: Grid<T>) => boolean): GridEntry<T>[]
+    public filter(predicate: (value: T, r: number, c: number, g: Grid<T>) => boolean): GridEntry<T>[]
     public filter<S extends T>(predicate: (value: T, r: number, c: number, g: Grid<T>) => value is S): GridEntry<S>[] {
         const vals: GridEntry<S>[] = [];
         this.grid.forEach((row, r) => row.forEach((val, c) => {
@@ -119,6 +123,7 @@ export class Grid<T> {
         return vals;
     }
 
+    public find(predicate: (value: T, r: number, c: number, g: Grid<T>) => boolean): GridEntry<T> | undefined
     public find<S extends T>(predicate: (value: T, r: number, c: number, g: Grid<T>) => value is S): GridEntry<S> | undefined {
         let coord: Coord | undefined = undefined;
         let val: T | undefined = undefined;
@@ -193,8 +198,15 @@ export class Grid<T> {
         return new Grid(this.grid.slice(rowsStart, rowsEnd));
     }
 
-    public print(predicate: GridPredicate<T, string>) {
-        console.log(this.grid.map((row, r) => row.map((val, c) => predicate(val, r, c, this)).join('')).join('\n'));
+    public print(predicate?: GridPredicate<T, string>) {
+        let p: GridPredicate<T, string>;
+        if (!predicate) {
+            p = (v: T) => (String(v));
+        }
+        else {
+            p = predicate;
+        }
+        console.log(this.grid.map((row, r) => row.map((val, c) => p(val, r, c, this)).join('')).join('\n'));
     }
 
     public flipVertical(): Grid<T> {
@@ -222,5 +234,19 @@ export class Grid<T> {
         }
 
         return new Grid<T>(rows);
+    }
+
+    public blit([r, c]: Coord, g: Grid<T>, transparency?: T) {
+        const maxr = r + g.height > this.height ? g.height - ((r + g.height) - this.height) : g.height;
+        const maxc = c + g.width > this.width ? g.width - ((c + g.width) - this.width) : g.width;
+
+        for (let ri = 0; ri < maxr; ri++) {
+            for (let ci = 0; ci < maxc; ci++) {
+                const v = g.at([ri, ci]);
+                if (v && v !== transparency) {
+                    this.set([r + ri, c + ci], v);
+                }
+            }
+        }
     }
 }
