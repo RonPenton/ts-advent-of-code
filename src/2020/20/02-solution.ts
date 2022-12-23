@@ -1,8 +1,7 @@
 //https://adventofcode.com/2020/day/20
-import { filterIterable, findIterable, identity, mapIterable, range, readFile, readLines } from "../../utils";
-import { Coord, Grid } from "../../utils/grid";
+import { findIterable, range, readFile } from "../../utils";
+import { Grid } from "../../utils/grid";
 const text = readFile(`${__dirname}\\01-input.txt`);
-
 
 const tilesText = text.split(/\r\n\r\n/i);
 
@@ -54,12 +53,6 @@ const makeLeftTopCorner = (tile: Grid<Bit>) => {
     return tile;
 }
 
-const opposite = (initial: number, next: number): number | undefined => {
-    const e = edges(tiles.get(next)!);
-    const idx = e.map(e => map[e]).findIndex(t => t.includes(initial));
-    return map[e[(idx + 2) % 2]].find(t => t != next);
-}
-
 const atDir = (initial: number, dir: number): number | undefined => {
     return map[edges(tiles.get(initial)!)[dir % 4]].find(t => t != initial);
 }
@@ -91,7 +84,7 @@ const orientate = (initial: number, next: number, dir: number): Grid<Bit> => {
 const firstCorner = findIterable(tiles.entries(), ([_, tile]) => edges(tile).filter(x => map[x].length == 1).length == 2)!;
 const firstTile = makeLeftTopCorner(firstCorner[1]);
 
-const bigGrid = firstTile.slice(1, 1, 9, 9);
+const bigGrid: Grid<string> = firstTile.slice(1, 1, 9, 9);
 
 tiles.set(firstCorner[0], firstTile);
 
@@ -101,7 +94,15 @@ let current: number | undefined = rowStart;
 let row = 0;
 let col = 0;
 
+const monster = [
+    `                  # `,
+    `#    ##    ##    ###`,
+    ` #  #  #  #  #  #   `
+];
+
+const monsterGrid = new Grid(monster.map(x => [...x]));
 while (rowStart != undefined) {
+
     while (current != undefined) {
         col++;
         const next = atDir(current, 1);
@@ -114,11 +115,7 @@ while (rowStart != undefined) {
             if (bigGrid.width < 8 * (col + 1)) {
                 bigGrid.growCols(8, '0');
             }
-            for (let r = 0; r < 8; r++) {
-                for (let c = 0; c < 8; c++) {
-                    bigGrid.set([r + row * 8, c + col * 8], g.at([r, c])!);
-                }
-            }
+            bigGrid.blit([row * 8, col * 8], g);
         }
 
         current = next;
@@ -135,44 +132,27 @@ while (rowStart != undefined) {
         if (bigGrid.height < 8 * (row + 1)) {
             bigGrid.growRows(8, '0');
         }
-        for (let r = 0; r < 8; r++) {
-            for (let c = 0; c < 8; c++) {
-                bigGrid.set([r + row * 8, c + col * 8], g.at([r, c])!);
-            }
-        }
-
+        bigGrid.blit([row * 8, col * 8], g);
         current = nextRow;
     }
     rowStart = nextRow;
 }
 
 
-const monster = [
-    `                  # `,
-    `#    ##    ##    ###`,
-    ` #  #  #  #  #  #   `
-];
-
 const checkPatterns = monster.map(x => parseInt(x.replaceAll(' ', '0').replaceAll('#', '1'), 2));
-const bin = (b: Bit[]) => parseInt(b.join(''), 2);
+const bin = (b: string[]) => parseInt(b.join(''), 2);
 
 const sliceLen = monster[0].length;
 
-const match = (_: Bit, r: number, c: number, g: Grid<Bit>) => {
+const match = (_: string, r: number, c: number, g: Grid<string>) => {
     if (r > g.height - monster.length || c > g.width - sliceLen)
         return false;
 
-    const a = range(3)
+    return range(3)
         .map(i => g.rowAt(r + i)!.slice(c, c + sliceLen))
         .map(bin)
         .map((n, i) => n & checkPatterns[i])
         .every((n, i) => n == checkPatterns[i]);
-
-    if (a == true) {
-        console.log([r, c]);
-    }
-
-    return a;
 }
 
 const [g, matches] = range(4).flatMap(n => {
@@ -182,31 +162,19 @@ const [g, matches] = range(4).flatMap(n => {
     }
 
     return [g, g.flipHorizontal(), g.flipVertical()];
-}).map(g => [g, g.filter(match)] as const).find(([g, m]) => m.length > 0)!;
+}).map(g => [g, g.filter(match)] as const).find(([_, m]) => m.length > 0)!;
 
 console.log(matches.length);
 
 let copy: Grid<string> = g.slice();
 
-const mon = new Grid(monster.map(x => [...x]));
 const m = matches.map(x => x.coord);
-for (const [r, c] of m) {
-    mon.forEach((v, ri, ci) => {
-
-        if (v == '#' && g.at([r + ri, c + ci]) != '1') {
-            console.log('BUG!');
-        }
-
-        if (v == '#') copy.set([r + ri, c + ci], 'O');
-    });
+for (const coord of m) {
+    copy.blit(coord, monsterGrid, ' ');
 }
 
 copy = copy.map((v) => v == '0' ? '.' : v == '1' ? '#' : 'O');
 
-const ohashes = g.filter(x => x == '1').length;
 const hashes = copy.filter(x => x == '#').length;
-const os = copy.filter(x => x == 'O').length;
-
+copy.print();
 console.log(hashes);
-//copy.print(identity);
-g.map(v => v == '0' ? '.' : v == '1' ? '#' : 'O').print(identity);

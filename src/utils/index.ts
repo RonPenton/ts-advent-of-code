@@ -106,7 +106,7 @@ export const difference = <T>(a: Set<T>, b: Set<T>) => new Set<T>([...a].filter(
 let d = 0;
 export const debug = (s: string) => {
     d++;
-    if (d % 100000 == 0) {
+    if (d % 100 == 0) {
         console.log(s);
     }
 }

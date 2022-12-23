@@ -158,6 +158,13 @@ export class Grid<T> {
         return this.grid.at(r)?.at(c);
     }
 
+    public atRaw([r, c]: Coord) {
+        const row = this.grid[r];
+        if(row)
+            return row[c];
+        return undefined;
+    }
+
     public rowAt(r: number) {
         return this.grid.at(r);
     }
@@ -188,9 +195,21 @@ export class Grid<T> {
         }
     }
 
+    public growRowsTop(rows: number, fill: T) {
+        for (let r = 0; r < rows; r++) {
+            this.grid.unshift(Array(this.width).fill(fill));
+        }
+    }
+
     public growCols(cols: number, fill: T) {
         for (let r = 0; r < this.height; r++) {
             this.grid[r].push(...Array(cols).fill(fill));
+        }
+    }
+
+    public growColsLeft(cols: number, fill: T) {
+        for (let r = 0; r < this.height; r++) {
+            this.grid[r].unshift(...Array(cols).fill(fill));
         }
     }
 
