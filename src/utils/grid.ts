@@ -26,6 +26,7 @@ export const addCoord = ([r1, c1]: Coord, [r2, c2]: Coord): Coord => [r1 + r2, c
 export const subCoord = ([r1, c1]: Coord, [r2, c2]: Coord): Coord => [r1 - r2, c1 - c2];
 const ads = (a: number, b: number) => Math.pow(Math.abs(a - b), 2);
 export const distCoord = ([r1, c1]: Coord, [r2, c2]: Coord): number => Math.sqrt(ads(r1, r2) + ads(c1, c2));
+export const distCoordFast = ([r1, c1]: Coord, [r2, c2]: Coord): number => Math.sqrt(ads(r1, r2) + ads(c1, c2));
 export const rectilinear = ([r1, c1]: Coord, [r2, c2]: Coord): number => Math.abs(r1 - r2) + Math.abs(c1 - c2);
 export const eqCoord = ([r1, c1]: Coord, [r2, c2]: Coord): boolean => r1 == r2 && c1 == c2;
 export const multCoord = ([r1, c1]: Coord, [r2, c2]: Coord): Coord => [r1 * r2, c1 * c2];
@@ -76,6 +77,16 @@ export const isDiagonal = ([r1, c1]: Coord, [r2, c2]: Coord) => {
     const cz = Math.abs(c2 - c1);
 
     return rz == cz;
+}
+
+export const wrapCoord = (r1: number, c1: number, r2: number, c2: number) => ([r, c]: Coord): Coord => {
+    const rd = r2 - r1;
+    const cd = c2 - c1;
+    if (r < r1) r = (((r - r1) % rd) + rd) + r1;
+    else if (r >= r2) r = ((r - r1) % rd) + r1;
+    if (c < c1) c = (((c - c1) % cd) + cd) + c1;
+    else if (c >= c2) c = ((c - c1) % cd) + c1;
+    return [r, c];
 }
 
 export type GridPredicate<T, R = void> = (val: T, r: number, c: number, g: Grid<T>) => R;

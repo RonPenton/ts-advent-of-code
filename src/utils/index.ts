@@ -116,11 +116,11 @@ export const intersection = <T>(a: Set<T>, b: Set<T>) => new Set<T>([...a].filte
 export const difference = <T>(a: Set<T>, b: Set<T>) => new Set<T>([...a].filter(x => !b.has(x)));
 
 let d = 0;
-export const debug = (s: string) => {
-    d++;
-    if (d % 100 == 0) {
+export const debug = (s: string, i: number = 10000) => {
+    if (d % i == 0) {
         console.log(s);
     }
+    d++;
 }
 
 export type Pair<T> = [T, T];

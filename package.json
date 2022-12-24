@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "clone-deep": "^4.0.1",
-    "md5": "^2.3.0"
+    "md5": "^2.3.0",
+    "ts-priority-queue": "^0.1.1"
   }
 }
