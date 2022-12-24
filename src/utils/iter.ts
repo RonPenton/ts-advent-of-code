@@ -272,6 +272,21 @@ export class Iter<T> implements IterableIterator<T> {
         return true;
     }
 
+    public setEquals(i: IterableIterator<T>): boolean;
+    public setEquals<V>(i: IterableIterator<T>, picker: (value: T, index: number) => V): boolean;
+    public setEquals<U, V>(i: IterableIterator<U>, picker: (value: T | U, index: number) => V): boolean;
+    public setEquals(i: ArrayLike<T>): boolean;
+    public setEquals<V>(i: ArrayLike<T>, picker: (value: T, index: number) => V): boolean;
+    public setEquals<U, V>(i: ArrayLike<U>, picker: (value: T | U, index: number) => V): boolean;
+    public setEquals(i: IterableIterator<any> | ArrayLike<any>, picker?: (value: any, index: number) => any) {
+        const p = picker ? picker : (t: T) => t;
+        const s1 = new Set(new Iter(i).map(p));
+        const s2 = new Set(this.map(p));
+        const i1 = new Iter(s1.values());
+        const i2 = new Iter(s2.values());
+        return i1.every(x => s2.has(x)) && i2.every(x => s1.has(x));
+    }
+
     public groupBy<U>(picker: (value: T, index: number) => U): Iter<[U, Iter<T>]> {
         const map = new Map<U, T[]>();
         let idx = 0;
