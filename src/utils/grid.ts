@@ -36,7 +36,7 @@ export const translate = ([tr, tc]: Coord) => ([r, c]: Coord): Coord => [tr + r,
 export const printCoord = ([r, c]: Coord) => `${r},${c}`;
 
 export const iterateOrthogonal = ([r1, c1]: Coord, [r2, c2]: Coord, predicate: (c: Coord) => void) => {
-    if (r1 != r2 && c1 != c2)
+    if (!isOrthogonal([r1, c1], [r2, c2]))
         throw new Error(`Points [${r1},${c1}] and [${r2},${c2}] are not orthogonal`);
 
     const dr = Math.sign(r2 - r1);
@@ -52,10 +52,7 @@ export const iterateOrthogonal = ([r1, c1]: Coord, [r2, c2]: Coord, predicate: (
 }
 
 export const iterateDiagonal = ([r1, c1]: Coord, [r2, c2]: Coord, predicate: (c: Coord) => void) => {
-    const rz = Math.abs(r2 - r1);
-    const cz = Math.abs(c2 - c1);
-
-    if (rz != cz)
+    if (!isDiagonal([r1, c1], [r2, c2]))
         throw new Error(`Points [${r1},${c1}] and [${r2},${c2}] are not diagonal`);
 
     const dr = Math.sign(r2 - r1);
@@ -70,6 +67,16 @@ export const iterateDiagonal = ([r1, c1]: Coord, [r2, c2]: Coord, predicate: (c:
     predicate([r, c]);
 }
 
+export const isOrthogonal = ([r1, c1]: Coord, [r2, c2]: Coord) => {
+    return r1 == r2 || c1 == c2;
+}
+
+export const isDiagonal = ([r1, c1]: Coord, [r2, c2]: Coord) => {
+    const rz = Math.abs(r2 - r1);
+    const cz = Math.abs(c2 - c1);
+
+    return rz == cz;
+}
 
 export type GridPredicate<T, R = void> = (val: T, r: number, c: number, g: Grid<T>) => R;
 
@@ -160,7 +167,7 @@ export class Grid<T> {
 
     public atRaw([r, c]: Coord) {
         const row = this.grid[r];
-        if(row)
+        if (row)
             return row[c];
         return undefined;
     }

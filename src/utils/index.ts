@@ -11,10 +11,22 @@ export function readFile(inputFileName: string) {
 
 export const defined = <T>(t: T | undefined | null): t is T => t !== undefined && t !== null;
 export const notEmpty = <T>(t: T | undefined | null): t is T => !!t;
-export const add = (a: number, b: number) => a + b;
-export const addC = (a: number) => (b: number) => a + b;
 
-export const mult = (a: number, b: number) => a * b;
+
+export function add(a: number): (b: number) => number;
+export function add(a: number, b: number): number;
+export function add(a: number, b?: number) {
+    if (b !== undefined) return a + b;
+    return (c: number) => a + c;
+}
+
+export function mul(a: number): (b: number) => number;
+export function mul(a: number, b: number): number;
+export function mul(a: number, b?: number) {
+    if (b !== undefined) return a * b;
+    return (c: number) => a * c;
+}
+
 export const fparseInt = (a: string) => parseInt(a);
 
 export const range = (a: number, b?: number): number[] => {
@@ -24,10 +36,10 @@ export const range = (a: number, b?: number): number[] => {
     }
 
     if (a > b) {
-        return [...Array(a - b).keys()].map(addC(b)).reverse();
+        return [...Array(a - b).keys()].map(add(b)).reverse();
     }
 
-    return [...Array(b - a).keys()].map(addC(a));
+    return [...Array(b - a).keys()].map(add(a));
 }
 
 export function apply<T extends unknown[], U extends unknown[], R>(fn: (...args: [...T, ...U]) => R, ...front: T) {

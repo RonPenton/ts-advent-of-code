@@ -113,7 +113,7 @@ export class Iter<T> implements IterableIterator<T> {
             idx++;
             next = this.iter.next();
         }
-        return initial;
+        return acc;
     }
 
     public take(count: number): Iter<T>;
@@ -251,6 +251,25 @@ export class Iter<T> implements IterableIterator<T> {
             }
         }
         return new Iter(f());
+    }
+
+    public isSubsetOf(i: IterableIterator<T>): boolean;
+    public isSubsetOf<V>(i: IterableIterator<T>, picker: (value: T, index: number) => V): boolean;
+    public isSubsetOf<U, V>(i: IterableIterator<U>, picker: (value: T | U, index: number) => V): boolean;
+    public isSubsetOf(i: ArrayLike<T>): boolean;
+    public isSubsetOf<V>(i: ArrayLike<T>, picker: (value: T, index: number) => V): boolean;
+    public isSubsetOf<U, V>(i: ArrayLike<U>, picker: (value: T | U, index: number) => V): boolean;
+    public isSubsetOf(i: IterableIterator<any> | ArrayLike<any>, picker?: (value: any, index: number) => any) {
+        const p = picker ? picker : (t: T) => t;
+        const set = new Set(new Iter(i).map(p));
+        let idx = 0;
+        for (const a of this) {
+            if (!set.has(p(a, idx))) {
+                return false;
+            }
+            idx++;
+        }
+        return true;
     }
 
     public groupBy<U>(picker: (value: T, index: number) => U): Iter<[U, Iter<T>]> {
