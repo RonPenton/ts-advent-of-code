@@ -12,7 +12,6 @@ export function readFile(inputFileName: string) {
 export const defined = <T>(t: T | undefined | null): t is T => t !== undefined && t !== null;
 export const notEmpty = <T>(t: T | undefined | null): t is T => !!t;
 
-
 export function add(a: number): (b: number) => number;
 export function add(a: number, b: number): number;
 export function add(a: number, b?: number) {
@@ -185,4 +184,15 @@ export function* mapIterable<T, U>(iterable: IterableIterator<T>, mapper: (value
         idx++;
         next = iterable.next();
     }
+}
+
+export function swap<A, B>([a, b]: [A, B]): [B, A] { return [b, a]; }
+export function first<A>([a]: [A]): A { return a; }
+export function second<A>([_, a]: [any, A]): A { return a; }
+export function third<A>([_, __, a]: [any, any, A]): A { return a; }
+
+export function delay(ms: number): Promise<void> {
+    return new Promise(resolve => {
+        setTimeout(resolve, ms);
+    });
 }

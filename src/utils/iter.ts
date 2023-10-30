@@ -1,3 +1,5 @@
+import { defined, tupleDefined } from ".";
+
 export class Iter<T> implements IterableIterator<T> {
 
     public iter: IterableIterator<T>;
@@ -48,6 +50,17 @@ export class Iter<T> implements IterableIterator<T> {
         return new Iter(r());
     }
 
+    public static fill<T>(size: number, value: T): Iter<T> {
+        function* r() {
+            for (let i = 0; i < size; i++) {
+                yield value;
+            }
+        }
+
+        return new Iter(r());
+    }
+
+
     public filter<S extends T>(predicate: (value: T, index: number) => value is S): Iter<S>;
     public filter(predicate: (value: T, index: number) => boolean): Iter<T>;
     public filter(predicate: (value: T, index: number) => unknown): unknown {
@@ -83,6 +96,21 @@ export class Iter<T> implements IterableIterator<T> {
         }
 
         return undefined;
+    }
+
+    public findIndex(predicate: (value: T, index: number) => boolean): number {
+        let next = this.iter.next();
+        let idx = 0;
+        while (!next.done) {
+            if (predicate(next.value, idx)) {
+                return idx;
+            }
+
+            idx++;
+            next = this.iter.next();
+        }
+
+        return -1;
     }
 
     public map<U>(mapper: (value: T, index: number) => U) {
@@ -231,6 +259,40 @@ export class Iter<T> implements IterableIterator<T> {
         return new Iter(f());
     }
 
+    public union(i: IterableIterator<T>): Iter<T>;
+    public union(i: Array<T>): Iter<T>;
+    public union<V>(i: IterableIterator<T>, picker: (value: T, index: number) => V): Iter<T>;
+    public union<V>(i: Array<T>, picker: (value: T, index: number) => V): Iter<T>;
+    public union<U, V>(i: IterableIterator<U>, picker: (value: T | U, index: number) => V): Iter<T>;
+    public union<U, V>(i: Array<U>, picker: (value: T | U, index: number) => V): Iter<T>;
+    public union(i: IterableIterator<any> | Array<any>, picker?: (value: any, index: number) => any) {
+        const me = this;
+        const p = picker ? picker : (t: T) => t;
+        function* f() {
+            const seen = new Set();
+            let idx = 0;
+            for (const a of me) {
+                const v = p(a, idx);
+                if (!seen.has(v)) {
+                    seen.add(v);
+                    yield a;
+                }
+                idx++;
+            }
+
+            for (const a of i) {
+                const v = p(a, idx);
+                if (!seen.has(v)) {
+                    seen.add(v);
+                    yield a;
+                }
+                idx++;
+            }
+        }
+        return new Iter(f());
+    }
+
+
     public except(i: IterableIterator<T>): Iter<T>;
     public except<V>(i: IterableIterator<T>, picker: (value: T, index: number) => V): Iter<T>;
     public except<U, V>(i: IterableIterator<U>, picker: (value: T | U, index: number) => V): Iter<T>;
@@ -248,6 +310,21 @@ export class Iter<T> implements IterableIterator<T> {
                     yield a;
                 }
                 idx++;
+            }
+        }
+        return new Iter(f());
+    }
+
+    public zip<U>(i: IterableIterator<U>): Iter<[T | undefined, U | undefined]>;
+    public zip<U, V>(u: IterableIterator<U>, v: IterableIterator<V>): Iter<[T | undefined, U | undefined, V | undefined]>;
+    public zip<U, V, W>(u: IterableIterator<U>, v: IterableIterator<V>, w: IterableIterator<W>): Iter<[T | undefined, U | undefined, V | undefined, W | undefined]>;
+    public zip(...i: IterableIterator<any>[]): Iter<any[]> {
+        i.unshift(this);
+        function* f() {
+            let nexts = i.map(j => j.next());
+            while (nexts.filter(x => !x.done).length > 0) {
+                yield nexts.map(x => x.value);
+                nexts = i.map(j => j.next());
             }
         }
         return new Iter(f());
@@ -383,6 +460,18 @@ export class Iter<T> implements IterableIterator<T> {
         return c;
     }
 
+    public chunk(size: number): Iter<Iter<T>> {
+
+        const me = this;
+        function* f() {
+            let take = me.take(size).array();
+            while (take.length > 0) {
+                yield Iter.from(take);
+            }
+        }
+        return new Iter(f());
+    }
+
     /**
      * Converts an iterator to an array. Warning: Slow. 
      * @returns 
@@ -395,3 +484,46 @@ export class Iter<T> implements IterableIterator<T> {
 }
 
 type Flat<Itr> = Itr extends Iter<infer Inner> ? Inner : Itr extends ArrayLike<infer Inner> ? Inner : Itr;
+
+
+// const a = Iter.from('abcdg');
+// const b = Iter.from('cdef');
+
+// const z = a.zip(b).array();
+// const x = z.filter(tupleDefined);
+// console.log(x);
+
+
+
+function* zip<T extends any[][]>(...args: T) {
+    const min = Math.min(...args.map(e => e.length));
+    for (let i = 0; i < min; i++) {
+        yield args.map(e => e[i]) as { [I in keyof T]: T[I][number] };
+    }
+}
+
+function zip2<T extends any[][]>(...args: T) {
+    const min = Math.min(...args.map(e => e.length));
+    return args.map(e => )
+    for (let i = 0; i < min; i++) {
+        yield args.map(e => e[i]) as { [I in keyof T]: T[I][number] };
+    }
+}
+
+const t: [number[], string[], boolean[]] = [[1, 2, 3], [...'hey'], [true, false]];
+type T = typeof t;
+type U = T extends any[][] ? true : false;
+type A = keyof T;
+type B = { [I in keyof T]: true };
+
+
+const x = new Iter(zip(...t));
+
+
+type Arr = readonly any[];
+ 
+function concat<T extends Arr, U extends Arr>(arr1: T, arr2: U): [...T, ...U] {
+  return [...arr1, ...arr2];
+}
+
+const a = concat([1,2] as [number, number], [true, false] as [boolean, boolean]);
