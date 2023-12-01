@@ -1,6 +1,5 @@
 // https://adventofcode.com/2023/day/1
 
-import { indexOf } from "lodash";
 import { keysOf, readLines } from "../../utils";
 
 const lines = readLines(`${__dirname}\\input.txt`).filter(x => !!x);
