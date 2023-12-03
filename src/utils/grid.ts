@@ -106,6 +106,11 @@ export class Grid<T> {
         return new Grid<T>(rows);
     }
 
+    public static fromLines<T>(lines: string[], predicate: (val: string) => T): Grid<T> {
+        const rows = lines.map(line => [...line].map(predicate));
+        return new Grid<T>(rows);
+    }
+
     constructor(items: T[][]) {
         this.grid = items;
     }
@@ -176,6 +181,10 @@ export class Grid<T> {
         return this.grid.at(r)?.at(c);
     }
 
+    public atDirection([r, c]: Coord, dir: Direction) {
+        return this.at(moveCoord([r, c], dir));
+    }
+
     public atRaw([r, c]: Coord) {
         const row = this.grid[r];
         if (row)
@@ -211,6 +220,10 @@ export class Grid<T> {
         for (let r = 0; r < rows; r++) {
             this.grid.push(Array(this.width).fill(fill));
         }
+    }
+
+    public pushRow(row: T[]) {
+        this.grid.push(row);
     }
 
     public growRowsTop(rows: number, fill: T) {
