@@ -196,3 +196,11 @@ export function delay(ms: number): Promise<void> {
         setTimeout(resolve, ms);
     });
 }
+
+export function* iterateRegex(regex: RegExp, text: string) {
+    let match = regex.exec(text);
+    while (match) {
+        yield match;
+        match = regex.exec(text);
+    }
+}
