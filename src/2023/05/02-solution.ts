@@ -1,4 +1,4 @@
-// https://adventofcode.com/{{year}}/day/{{day}}
+// https://adventofcode.com/2023/day/5
 
 import { readLines, notEmpty } from "../../utils";
 

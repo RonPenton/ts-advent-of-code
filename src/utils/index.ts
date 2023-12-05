@@ -41,6 +41,8 @@ export const range = (a: number, b?: number): number[] => {
     return [...Array(b - a).keys()].map(add(a));
 }
 
+export const between = ([a, b]: [number, number]) => (n: number) => n >= a && n <= b;
+
 export function apply<T extends unknown[], U extends unknown[], R>(fn: (...args: [...T, ...U]) => R, ...front: T) {
     return (...tailArgs: U) => fn(...front, ...tailArgs);
 }
@@ -110,9 +112,7 @@ export const sortNumberRev = (a: number, b: number) => b - a;
 
 export function identity<T>(a: T) { return a };
 
-export const union = <T>(a: Set<T>, b: Set<T>) => new Set<T>([...a, ...b]);
-export const intersection = <T>(a: Set<T>, b: Set<T>) => new Set<T>([...a].filter(x => b.has(x)));
-export const difference = <T>(a: Set<T>, b: Set<T>) => new Set<T>([...a].filter(x => !b.has(x)));
+export * from './set';
 
 let d = 0;
 export const debug = (s: string, i: number = 10000) => {

@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "download": "node ./src/core/download-day.mjs"
+    "download": "node ./src/core/download-day.mjs",
+    "exec": "node ./src/core/exec.mjs"
   },
   "repository": {
     "type": "git",

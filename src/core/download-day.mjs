@@ -15,6 +15,8 @@ async function downloadDay(year, day) {
 
     fs.mkdirSync(`./src/${year}/${dayStr}`, { recursive: true });
     fs.writeFileSync(`./src/${year}/${dayStr}/input.txt`, input);
+    fs.writeFileSync(`./src/${year}/${dayStr}/sample1.txt`, '');
+    fs.writeFileSync(`./src/${year}/${dayStr}/sample2.txt`, '');
 
     const template = Handlebars.compile(fs.readFileSync('./src/core/template.hbs', 'utf-8'));
     const solution1 = template({ year, day, which: '01' });

@@ -15,10 +15,13 @@ const parseLine = (line: string) => {
 
 const computeWinningNumbers = (winning: Set<number>, have: Set<number>) => {
     const intersect = intersection(winning, have);
-    if(intersect.size === 0) return 0;
+    if (intersect.size === 0) return 0;
     return Math.pow(2, intersect.size - 1);
 }
 
-const points = lines.map(parseLine).map(([winning, have]) => computeWinningNumbers(winning, have)).reduce(add, 0);
+const points = lines
+    .map(parseLine)
+    .map(([winning, have]) => computeWinningNumbers(winning, have))
+    .reduce(add, 0);
 
 console.log(points);

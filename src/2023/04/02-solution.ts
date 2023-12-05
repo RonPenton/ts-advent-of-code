@@ -18,17 +18,19 @@ const computeWinningNumbers = (winning: Set<number>, have: Set<number>) => {
     return intersect.size;
 }
 
-const winningCards = lines.map(parseLine).map(([winning, have]) => computeWinningNumbers(winning, have));
+const winningCards = lines
+    .map(parseLine)
+    .map(([winning, have]) => computeWinningNumbers(winning, have));
 
 const cardCount = new Array(winningCards.length).fill(1);
 
-for(let i = 0; i < winningCards.length; i++) {
+for (let i = 0; i < winningCards.length; i++) {
     const wins = winningCards[i];
-    if(wins === 0) continue;
+    if (wins === 0) continue;
 
     const count = cardCount[i];
     const winningIndicies = range(i + 1, i + 1 + wins);
-    for(const winningIndex of winningIndicies) {
+    for (const winningIndex of winningIndicies) {
         cardCount[winningIndex] += count;
     }
 }

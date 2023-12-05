@@ -1,5 +1,3 @@
-import { defined, tupleDefined } from ".";
-
 export class Iter<T> implements IterableIterator<T> {
 
     public iter: IterableIterator<T>;
@@ -485,45 +483,6 @@ export class Iter<T> implements IterableIterator<T> {
 
 type Flat<Itr> = Itr extends Iter<infer Inner> ? Inner : Itr extends ArrayLike<infer Inner> ? Inner : Itr;
 
-
-// const a = Iter.from('abcdg');
-// const b = Iter.from('cdef');
-
-// const z = a.zip(b).array();
-// const x = z.filter(tupleDefined);
-// console.log(x);
-
-
-
-function* zip<T extends any[][]>(...args: T) {
-    const min = Math.min(...args.map(e => e.length));
-    for (let i = 0; i < min; i++) {
-        yield args.map(e => e[i]) as { [I in keyof T]: T[I][number] };
-    }
+export function iter<T>(arr: ArrayLike<T> | IterableIterator<T>) {
+    return new Iter(arr);
 }
-
-function zip2<T extends any[][]>(...args: T) {
-    const min = Math.min(...args.map(e => e.length));
-    return args.map(e => )
-    for (let i = 0; i < min; i++) {
-        yield args.map(e => e[i]) as { [I in keyof T]: T[I][number] };
-    }
-}
-
-const t: [number[], string[], boolean[]] = [[1, 2, 3], [...'hey'], [true, false]];
-type T = typeof t;
-type U = T extends any[][] ? true : false;
-type A = keyof T;
-type B = { [I in keyof T]: true };
-
-
-const x = new Iter(zip(...t));
-
-
-type Arr = readonly any[];
- 
-function concat<T extends Arr, U extends Arr>(arr1: T, arr2: U): [...T, ...U] {
-  return [...arr1, ...arr2];
-}
-
-const a = concat([1,2] as [number, number], [true, false] as [boolean, boolean]);
