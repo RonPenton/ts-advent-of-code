@@ -1,13 +1,16 @@
 // https://adventofcode.com/2023/day/5
 
-import { readLines, notEmpty, iterateRegex, Range, rangeIntersection, rangeDifference, rangesIntersection, rangesOffset, rangesSubtract, rangesUnion } from "../../utils";
+import {
+    readLines,
+    notEmpty,
+    iterateRegex,
+    Range, rangesIntersection, rangeOffset, rangesSubtract, rangesUnion
+} from "../../utils";
 
 const lines = readLines(`${__dirname}\\input.txt`).filter(notEmpty);
-
 const [seedLine, ...rest] = lines;
-
-const seeds = [...iterateRegex(/(\d+) (\d+)/g, seedLine.split(':')[1])]
-    .map(x => [Number(x[1]), Number(x[1]) + Number(x[2])] as const);
+const seeds: Range[] = [...iterateRegex(/(\d+) (\d+)/g, seedLine.split(':')[1])]
+    .map(x => [Number(x[1]), Number(x[1]) + Number(x[2])]);
 
 // example uses confusing nomenclature.
 // seed = source
@@ -50,16 +53,13 @@ const mapRange = (map: ParsedMap, seeds: Range[]): Range[] => {
     let results: Range[] = [];
 
     for (const range of ranges) {
-
         if (!untestedRanges.length) break;
 
         const { destination, source, range: r } = range;
-
         const sourceRange = [source, source + r] as const;
-
         const intersects = rangesIntersection(untestedRanges, [sourceRange]);
         if (intersects.length > 0) {
-            results.push(...rangesOffset(intersects, destination - source));
+            results.push(...intersects.map(rangeOffset(destination - source)));
             untestedRanges = rangesSubtract(untestedRanges, sourceRange);
         }
     }
@@ -73,11 +73,8 @@ const computeRanges = (position: string, maps: Map<string, ParsedMap>, seeds: Ra
     return computeRanges(entry.to, maps, mapRange(entry, seeds));
 }
 
-
-
 const maps = [...parseMaps(rest)];
 const sourceMap: Map<string, ParsedMap> = new Map(maps.map(m => [m.from, m]));
-
 const solutionRanges = seeds.flatMap(seed => computeRanges('seed', sourceMap, [seed]));
 const lowest = Math.min(...solutionRanges.map(r => r[0]));
 console.log(lowest);
