@@ -31,7 +31,6 @@
     "clone-deep": "^4.0.1",
     "dotenv": "^16.3.1",
     "handlebars": "^4.7.8",
-    "lodash": "^4.17.21",
     "md5": "^2.3.0",
     "open": "^9.1.0",
     "ts-priority-queue": "^0.1.1",

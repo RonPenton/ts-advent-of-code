@@ -18,9 +18,14 @@ async function downloadDay(year, day) {
     fs.writeFileSync(`./src/${year}/${dayStr}/sample1.txt`, '');
     fs.writeFileSync(`./src/${year}/${dayStr}/sample2.txt`, '');
 
+    // only show the url if it's for the current year
+    // Copilot has been extensively trained on previous year's solutions so 
+    // the URL tips it off to auto-solve it... no fun. 
+    const showUrl = year == new Date().getFullYear();
+
     const template = Handlebars.compile(fs.readFileSync('./src/core/template.hbs', 'utf-8'));
-    const solution1 = template({ year, day, which: '01' });
-    const solution2 = template({ year, day, which: '02' });
+    const solution1 = template({ year, day, which: '01', showUrl });
+    const solution2 = template({ year, day, which: '02', showUrl });
 
     fs.writeFileSync(`./src/${year}/${dayStr}/01-solution.ts`, solution1);
     fs.writeFileSync(`./src/${year}/${dayStr}/02-solution.ts`, solution2);
