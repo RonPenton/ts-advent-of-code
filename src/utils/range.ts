@@ -1,6 +1,6 @@
 export type Range = readonly [number, number];
 
-export const between = ([a, b]: Range) => (n: number) => n >= a && n <= b;
+export const rangeContains = ([a, b]: Range) => (n: number) => n >= a && n <= b;
 
 export const rangeIntersection = ([a, b]: Range, [c, d]: Range): Range | undefined => {
     if (a > d || c > b) return undefined;
@@ -65,3 +65,13 @@ export const rangeOffset = (offset: number) => (range: Range): Range => {
     const [a, b] = range;
     return [a + offset, b + offset];
 }
+
+export const rangePartition = (range: Range, lengthOfFirstHalf: number): [Range, Range] => {
+    const [a, b] = range;
+    const firstHalf: Range = [a, a + lengthOfFirstHalf - 1];
+    const secondHalf: Range = [a + lengthOfFirstHalf, b];
+    return [firstHalf, secondHalf];
+}
+
+export const rangeLength = ([a, b]: Range) => b - a + 1;
+
