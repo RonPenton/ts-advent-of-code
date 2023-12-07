@@ -1,6 +1,6 @@
 // https://adventofcode.com/2023/day/7
 
-import { readLines, notEmpty, unique, difference } from "../../utils";
+import { readLines, notEmpty, unique, difference, identity } from "../../utils";
 import { iter } from "../../utils/iter";
 
 const lines = readLines(`${__dirname}\\input.txt`).filter(notEmpty);
@@ -14,18 +14,18 @@ type HandType = typeof handTypes[number];
 
 type Hand = [Face, Face, Face, Face, Face];
 
+const groupCounts = (hand: Hand) => iter(hand)
+    .groupBy(identity)
+    .map(([_, g]) => g.count())
+    .filter(c => c > 1);
+
 const classifiers: Record<HandType, (hand: Hand) => boolean> = {
-    five: hand => iter(unique(hand).values()).some(f => hand.filter(x => x == f).length === 5),
-    four: hand => iter(unique(hand).values()).some(f => hand.filter(x => x == f).length === 4),
-    full: hand => {
-        const threes = iter(unique(hand).values()).filter(f => hand.filter(x => x == f).length === 3);
-        if (threes.count() !== 1) return false;
-        const rest = iter(hand).except(threes);
-        return rest.unique().some(f => hand.filter(x => x == f).length === 2);
-    },
-    three: hand => iter(unique(hand).values()).some(f => hand.filter(x => x == f).length === 3),
-    twopair: hand => iter(unique(hand).values()).filter(f => hand.filter(x => x == f).length === 2).count() === 2,
-    onepair: hand => iter(unique(hand).values()).some(f => hand.filter(x => x == f).length === 2),
+    five: hand => groupCounts(hand).some(c => c === 5),
+    four: hand => groupCounts(hand).some(c => c === 4),
+    full: hand => groupCounts(hand).some(c => c === 3) && groupCounts(hand).some(c => c === 2),
+    three: hand => groupCounts(hand).some(c => c === 3),
+    twopair: hand => groupCounts(hand).filter(c => c === 2).count() === 2,
+    onepair: hand => groupCounts(hand).some(c => c === 2),
     high: () => true
 }
 
@@ -55,7 +55,7 @@ const rankHand = (hand: Hand): number => {
         const jCount = hand.filter(x => x === 'J').length;
         const withoutJ = hand.filter(x => x !== 'J') as Hand;
         const withoutJRank = handTypes.find(h => classifiers[h](withoutJ));
-    
+
         // 5^13 = 1220703125 lol. NOPE. Do some heuristics.
         switch (jCount) {
             case 5: return handTypes.findIndex(h => h === 'five');
@@ -67,7 +67,7 @@ const rankHand = (hand: Hand): number => {
             case 0:
                 return handTypes.findIndex(h => classifiers[h](hand));
         }
-    
+
         // the rest we can permutate. Lazy and don't feel like finding all the rules for the rest.
         const permutated = permutateHandForJokers(hand);
         const sorted = permutated.sort(compareHands);
