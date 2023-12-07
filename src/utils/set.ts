@@ -35,3 +35,8 @@ export const difference = <T>(a: Set<T> | readonly T[], b: Set<T> | readonly T[]
     const bb = b instanceof Set ? b : new Set(b);
     return new Set<T>(aa.filter(x => !bb.has(x)));
 }
+
+export const unique = <T>(a: Set<T> | readonly T[]) => {
+    const aa = a instanceof Set ? a : new Set(a);
+    return aa;
+}
