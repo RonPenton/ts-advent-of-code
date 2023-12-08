@@ -52,28 +52,33 @@ const findCycleLength = (start: string): number => {
     const key = (node: string, instruction: number) => `${node}-${instruction}`;
     const visited = new Map<string, number>();
 
-    let firstCycleNode: string | null = null;
+    let firstCycleKey: string | null = null;
 
-    const findDepth = (start: string, instruction: number, depth: number): number => {
-        const m = map.get(start)!;
-        const ins = instructions[instruction];
-        const k = key(start, instruction);
-        if(visited.has(k)) {
-            firstCycleNode = start;
-            return depth;
+    let current = start;
+    let instruction = 0;
+    let depth = 0;
+
+    while (true) {
+        const k = key(current, instruction);
+        if (visited.has(k)) {
+            firstCycleKey = k;
+            break;
         }
 
         visited.set(k, depth);
-        if (ins === 'L') {
-            return findDepth(m.left, instruction + 1, depth + 1);
-        } else {
-            return findDepth(m.right, instruction + 1, depth + 1);
+        const ins = instructions[instruction];
+        const { left, right } = map.get(current) ?? { left: '', right: '' };
+        if (ins === 'L') current = left;
+        else current = right;
+        instruction++;
+        if (instruction >= instructions.length) {
+            instruction = 0;
         }
+        depth++;
     }
 
-    const maxDepth = findDepth(start, 0, 0);
-    const cycleStart = visited.get(key(firstCycleNode!, 0))!;
-    return maxDepth - cycleStart;
+    const cycleStart = visited.get(firstCycleKey!)!;
+    return depth - cycleStart;
 }
 
 const counts = starts.map(findCycleLength);
