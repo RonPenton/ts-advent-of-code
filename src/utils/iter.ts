@@ -1,6 +1,19 @@
+
+/**
+ * Allows an iterator to be used after a function like take has been called on it.
+ * @param val 
+ * @param itr 
+ */
+function* cont<T>(val: T, itr: IterableIterator<T>): IterableIterator<T> {
+    yield val;
+    yield* itr;
+}
+
 export class Iter<T> implements IterableIterator<T> {
 
     public iter: IterableIterator<T>;
+
+    public continue: IterableIterator<T>;
 
     public constructor(c: ArrayLike<T> | IterableIterator<T>) {
         if ('length' in c) {
@@ -11,9 +24,11 @@ export class Iter<T> implements IterableIterator<T> {
                 }
             }
             this.iter = f();
+            this.continue = this.iter;
         }
         else {
             this.iter = c;
+            this.continue = c;
         }
     }
 
@@ -159,6 +174,7 @@ export class Iter<T> implements IterableIterator<T> {
                     yield next.value;
                 }
                 else {
+                    me.continue = cont(next.value, me.iter);
                     return;
                 }
 
@@ -168,6 +184,45 @@ export class Iter<T> implements IterableIterator<T> {
         }
         return new Iter(f());
     }
+
+    
+    public bifurtake(count: number): [Iter<T>, Iter<T>];
+    public bifurtake<S extends T>(predicate: (value: T, index: number) => value is S): [Iter<S>, Iter<T>];
+    public bifurtake(predicate: (value: T, index: number) => boolean): [Iter<T>, Iter<T>];
+    public bifurtake(predicate: any): unknown {
+        const me = this;
+
+        let p = typeof predicate == 'number' ? (_: T, i: number) => i < predicate : predicate;
+
+        let next = me.iter.next();
+
+        const taken = function() {
+            let idx = 0;
+            const t: T[] = []
+            while (!next.done) {
+                if (p(next.value, idx)) {
+                    t.push(next.value);
+                }
+                else {
+                    return t;
+                }
+
+                idx++;
+                next = me.next();
+            }
+            return t;
+        }();
+
+
+        function* f() {
+            while (!next.done) {
+                yield next.value;
+                next = me.next();
+            }
+        }
+        return [new Iter(taken), new Iter(f())];
+    }
+
 
     public skip(count: number): Iter<T>;
     public skip<S extends T>(predicate: (value: T, index: number) => value is S): Iter<S>;
