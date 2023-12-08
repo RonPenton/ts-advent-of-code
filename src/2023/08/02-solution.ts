@@ -25,28 +25,58 @@ const map = new Map<string, Node>(rest.map(parseNode).filter(notEmpty));
 
 const starts = iter(map.keys()).filter(x => x.endsWith('A')).array();
 
-const findDepth = (start: string): number => {
-    let current = start;
-    let instruction = 0;
-    let count = 0;
-    while (!current.endsWith('Z')) {
+// const findDepth = (start: string): number => {
+//     let current = start;
+//     let instruction = 0;
+//     let count = 0;
+//     while (!current.endsWith('Z')) {
+//         const ins = instructions[instruction];
+//         const { left, right } = map.get(current) ?? { left: '', right: '' };
+//         if (ins === 'L') {
+//             current = left;
+//         } else {
+//             current = right;
+//         }
+//         instruction++;
+//         if (instruction >= instructions.length) {
+//             instruction = 0;
+//         }
+//         count++;
+//     }
+//     return count;
+// }
+
+// Now with cycle detection!
+const findCycleLength = (start: string): number => {
+
+    const key = (node: string, instruction: number) => `${node}-${instruction}`;
+    const visited = new Map<string, number>();
+
+    let firstCycleNode: string | null = null;
+
+    const findDepth = (start: string, instruction: number, depth: number): number => {
+        const m = map.get(start)!;
         const ins = instructions[instruction];
-        const { left, right } = map.get(current) ?? { left: '', right: '' };
+        const k = key(start, instruction);
+        if(visited.has(k)) {
+            firstCycleNode = start;
+            return depth;
+        }
+
+        visited.set(k, depth);
         if (ins === 'L') {
-            current = left;
+            return findDepth(m.left, instruction + 1, depth + 1);
         } else {
-            current = right;
+            return findDepth(m.right, instruction + 1, depth + 1);
         }
-        instruction++;
-        if (instruction >= instructions.length) {
-            instruction = 0;
-        }
-        count++;
     }
-    return count;
+
+    const maxDepth = findDepth(start, 0, 0);
+    const cycleStart = visited.get(key(firstCycleNode!, 0))!;
+    return maxDepth - cycleStart;
 }
 
-const counts = starts.map(findDepth);
+const counts = starts.map(findCycleLength);
 
 const lcm = (a: number, b: number): number => {
     const gcd = (a: number, b: number): number => {
