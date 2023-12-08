@@ -208,3 +208,25 @@ export function* iterateRegex(regex: RegExp, text: string) {
 
 export * from './set';
 export * from './range';
+
+export function binarySearch<T>(
+    arr: T[],
+    pick: T,
+    comp: (a: T, b: T) => number,
+    low?: number,
+    high?: number
+): number {
+    low = low ?? 0;
+    high = high ?? arr.length - 1;
+
+    while (low <= high) {
+        const mid = Math.floor((low + high) / 2);
+        const midVal = arr[mid];
+        const c = comp(pick, midVal);
+        if (c == 0) return mid;
+        else if (c > 0) low = mid + 1;
+        else high = mid - 1;
+    }
+
+    return -1;
+}
