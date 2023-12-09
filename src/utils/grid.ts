@@ -181,8 +181,35 @@ export class Grid<T> {
         return this.grid.at(r)?.at(c);
     }
 
-    public atDirection([r, c]: Coord, dir: Direction) {
+    /**
+     * Warning: This method wraps around the array.
+     * @param param0 
+     * @param dir 
+     * @returns 
+     */
+    public atDirectionWrap([r, c]: Coord, dir: Direction) {
         return this.at(moveCoord([r, c], dir));
+    }
+
+    public atDirectionRaw([r, c]: Coord, dir: Direction) {
+        return this.atRaw(moveCoord([r, c], dir));
+    }
+
+    public iterateDirection([r, c]: Coord, dir: Direction, predicate?: GridPredicate<T | undefined, boolean>): GridEntry<T>[] {
+        // by default use a predicate that stays in bounds.
+        predicate = predicate ?? ((_, r, c) => r >= 0 && c >= 0 && r < this.height && c < this.width);
+
+        let vals: GridEntry<T>[] = [];
+        const [dr, dc] = Deltas[dir];
+        let [nr, nc] = [r + dr, c + dc];
+        let val = this.at([nr, nc]);
+        while (val !== undefined && predicate(val, nr, nc, this)) {
+            vals.push({ coord: [nr, nc], val });
+            nr += dr;
+            nc += dc;
+            val = this.at([nr, nc]);
+        }
+        return vals;
     }
 
     public atRaw([r, c]: Coord) {
