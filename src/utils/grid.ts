@@ -1,5 +1,6 @@
 export type Coord = [r: number, c: number];
 
+export const OrthogonalDirections = ['up', 'down', 'left', 'right'] as const;
 export const Directions = ['up', 'upright', 'right', 'downright', 'down', 'downleft', 'left', 'upleft'] as const;
 export type Direction = typeof Directions[number];
 
@@ -16,6 +17,10 @@ export const Deltas: Record<Direction, Coord> = {
 
 export const rotate = (dir: Direction, amt: -135 | -90 | -45 | 0 | 45 | 90 | 135 | 180) => {
     return Directions[(Directions.indexOf(dir) + (amt / 45) + Directions.length) % Directions.length];
+}
+
+export const oppositeDirection = (dir: Direction): Direction => {
+    return rotate(dir, 180);
 }
 
 export const moveCoord = (c: Coord, dir: Direction): Coord => {
@@ -35,6 +40,7 @@ export const scaleCoord = ([r1, c1]: Coord, v: number): Coord => [r1 * v, c1 * v
 export const translate = ([tr, tc]: Coord) => ([r, c]: Coord): Coord => [tr + r, tc + c];
 
 export const printCoord = ([r, c]: Coord) => `${r},${c}`;
+export const parseCoord = (s: string): Coord => s.split(',').map(Number) as Coord;
 
 export const iterateOrthogonal = ([r1, c1]: Coord, [r2, c2]: Coord, predicate: (c: Coord) => void) => {
     if (!isOrthogonal([r1, c1], [r2, c2]))
