@@ -95,6 +95,7 @@ const computePolygon = (coord: Coord, d: Direction): Coord[] => {
         // found the start.
         if (next === 'S') {
             polygon.push(currentStopPoint);
+            polygon.push(nextCoord);
             return polygon;
         }
 
