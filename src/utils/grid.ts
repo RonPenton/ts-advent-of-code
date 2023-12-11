@@ -332,4 +332,42 @@ export class Grid<T> {
             }
         }
     }
+
+    public * row(r: number) {
+        for (let c = 0; c < this.width; c++) {
+            yield this.grid[r][c];
+        }
+    }
+
+    public * column(c: number) {
+        for (let r = 0; r < this.height; r++) {
+            yield this.grid[r][c];
+        }
+    }
+
+    public * rows() {
+        for (let r = 0; r < this.height; r++) {
+            yield this.grid[r];
+        }
+    }
+
+    public * columns() {
+        for (let c = 0; c < this.width; c++) {
+            yield this.column(c);
+        }
+    }
+
+    public insertColumn(c: number, fill: T) {
+        for (let r = 0; r < this.height; r++) {
+            this.grid[r].splice(c, 0, fill);
+        }
+    }
+
+    public insertRow(r: number, fill: T) {
+        this.grid.splice(r, 0, Array(this.width).fill(fill));
+    }
+
+    public clone() {
+        return new Grid(this.grid.map(row => row.slice()));
+    }
 }
