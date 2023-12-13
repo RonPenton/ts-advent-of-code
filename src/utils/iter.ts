@@ -639,6 +639,19 @@ export class Iter<T> implements IterableIterator<T> {
         return c;
     }
 
+    public join(separator: string, predicate?: (value: T, index: number) => string) {
+        const p = predicate ? predicate : (t: T) => String(t)
+        let next = this.iter.next();
+        let idx = 0;
+        let strs = [];
+        while (!next.done) {
+            strs.push(p(next.value, idx));
+            idx++;
+            next = this.next();
+        }
+        return strs.join(separator);
+    }
+
     public chunk(size: number): Iter<Iter<T>> {
         const me = this;
         function* f() {

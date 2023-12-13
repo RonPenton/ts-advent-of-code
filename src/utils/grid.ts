@@ -347,7 +347,7 @@ export class Grid<T> {
 
     public * rows() {
         for (let r = 0; r < this.height; r++) {
-            yield this.grid[r];
+            yield this.row(r);
         }
     }
 

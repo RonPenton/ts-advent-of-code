@@ -1,6 +1,6 @@
 // https://adventofcode.com/2023/day/13
 
-import { readLines, notEmpty, defined, add } from "../../utils";
+import { readLines, defined, add } from "../../utils";
 import { Grid } from "../../utils/grid";
 import { iter } from "../../utils/iter";
 
@@ -29,12 +29,12 @@ function* parseGrids(lines: string[]) {
     if (grid) yield grid;
 }
 
-const computeScore = (tiles: Tile[]): number => {
-    const binary = tiles.join('').replaceAll('.', '0').replaceAll('#', '1');
+const computeScore = (tiles: Generator<Tile>): number => {
+    const binary = iter(tiles).join('').replaceAll('.', '0').replaceAll('#', '1');
     return parseInt(binary, 2);
 }
 
-const computeRankScores = (ranks: Tile[][]): number[] => {
+const computeRankScores = (ranks: Generator<Generator<Tile>>): number[] => {
     return iter(ranks).map(computeScore).array();
 }
 
@@ -68,9 +68,8 @@ const checkMirror = (rankScores: number[], start: number): boolean => {
 
 const mirrorScore = (grid: LavaGrid) => {
     const [rows, cols] = [
-        isMirror(computeRankScores(iter(grid.rows()).array())),
-        // I really need to make a better iterator type. ¯\_(ツ)_/¯
-        isMirror(computeRankScores(iter(grid.columns()).map(x => [...x]).array()))
+        isMirror(computeRankScores(grid.rows())),
+        isMirror(computeRankScores(grid.columns()))
     ];
 
     return [
