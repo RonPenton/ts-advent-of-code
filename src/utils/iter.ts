@@ -12,18 +12,27 @@ function* cont<T>(val: T, itr: IterableIterator<T>): IterableIterator<T> {
 export class Iter<T> implements IterableIterator<T> {
 
     public iter: IterableIterator<T>;
+    private baseArray: T[] | undefined = undefined;
+    private currentLocation: number | undefined = undefined
 
     public continue: IterableIterator<T>;
 
-    public constructor(c: ArrayLike<T> | IterableIterator<T>) {
+    public constructor(c: ArrayLike<T> | Array<T> | IterableIterator<T>, startIndex?: number) {
         if ('length' in c) {
-            const arr = c;
-            function* f() {
+
+            if (Array.isArray(c)) {
+                this.baseArray = c;
+            }
+
+            const me = this;
+            this.currentLocation = 0;
+            function* f(arr: ArrayLike<T>) {
                 for (let i = 0; i < arr.length; i++) {
+                    me.currentLocation = i + 1;
                     yield arr[i];
                 }
             }
-            this.iter = f();
+            this.iter = f(c);
             this.continue = this.iter;
         }
         else {
@@ -111,6 +120,11 @@ export class Iter<T> implements IterableIterator<T> {
         return undefined;
     }
 
+    /**
+     * Finds the first index that matches the predicate, or -1 if not found.
+     * @param predicate 
+     * @returns 
+     */
     public findIndex(predicate: (value: T, index: number) => boolean): number {
         let next = this.iter.next();
         let idx = 0;
@@ -185,7 +199,7 @@ export class Iter<T> implements IterableIterator<T> {
         return new Iter(f());
     }
 
-    
+
     public bifurtake(count: number): [Iter<T>, Iter<T>];
     public bifurtake<S extends T>(predicate: (value: T, index: number) => value is S): [Iter<S>, Iter<T>];
     public bifurtake(predicate: (value: T, index: number) => boolean): [Iter<T>, Iter<T>];
@@ -196,7 +210,7 @@ export class Iter<T> implements IterableIterator<T> {
 
         let next = me.iter.next();
 
-        const taken = function() {
+        const taken = function () {
             let idx = 0;
             const t: T[] = []
             while (!next.done) {
@@ -225,9 +239,8 @@ export class Iter<T> implements IterableIterator<T> {
 
 
     public skip(count: number): Iter<T>;
-    public skip<S extends T>(predicate: (value: T, index: number) => value is S): Iter<S>;
     public skip(predicate: (value: T, index: number) => boolean): Iter<T>;
-    public skip(predicate: any): unknown {
+    public skip(predicate: any): Iter<T> {
         const me = this;
 
         let p = typeof predicate == 'number' ? (_: T, i: number) => i < predicate : predicate;
@@ -247,6 +260,116 @@ export class Iter<T> implements IterableIterator<T> {
 
                 idx++;
                 next = me.next();
+            }
+        }
+        return new Iter(f());
+    }
+
+    /**
+     * Cartesian Product of the two iterators.
+     * Second iterator is fully materialized so that it can be iterated over multiple times, 
+     * so careful about memory usage.
+     * @param other 
+     * @returns 
+     */
+    public product<U>(other: Iter<U>): Iter<[T, U]> {
+        const me = this;
+
+        function* f() {
+            const otherArr = other.array();
+            let next = me.iter.next();
+
+            while (!next.done) {
+                for (const u of otherArr) {
+                    yield [next.value, u] as [T, U];
+                }
+                next = me.next();
+            }
+        }
+        return new Iter(f());
+    }
+
+    /**
+     * Combinations of the iterator values.
+     * The iterator is fully materialized so that it can be iterated over multiple times, 
+     * so careful about memory usage.
+     * @param other 
+     * @returns 
+     */
+    public combinations(): Iter<[T, T]> {
+        const me = this;
+        function* f() {
+            const arr = me.array();
+            for (let i = 0; i < arr.length; i++) {
+                for (let j = i + 1; j < arr.length; j++) {
+                    yield [arr[i], arr[j]] as [T, T];
+                }
+            }
+        }
+        return new Iter(f());
+    }
+
+    /**
+     * Permutations of the iterator values.
+     * The iterator is fully materialized so that it can be iterated over multiple times, 
+     * so careful about memory usage.
+     * @param other 
+     * @returns 
+     */
+    public permutations(): Iter<[T, T]> {
+        const me = this;
+
+        function* f() {
+            const arr = me.array();
+            for (let i = 0; i < arr.length; i++) {
+                for (let j = 0; j < arr.length; j++) {
+                    if (i !== j) {
+                        yield [arr[i], arr[j]] as [T, T];
+                    }
+                }
+            }
+
+        }
+        return new Iter(f());
+    }
+
+    /**
+     * Iterates over the list until it is exhausted, then continues to cycle over
+     * the list indefinitely, or for the specified number of times.
+     * The iterator is fully materialized so that it can be iterated over multiple times, 
+     * so careful about memory usage.
+     * @param other 
+     * @returns 
+     */
+    public cycle(cycles?: number): Iter<T> {
+        const me = this;
+        function* f() {
+            const cache: T[] = []
+            let next = me.iter.next();
+            while (!next.done) {
+                cache.push(next.value);
+                yield next.value;
+                next = me.next();
+            }
+            while (cycles === undefined || --cycles) {
+                for (const c of cache) {
+                    yield c;
+                }
+            }
+        }
+        return new Iter(f());
+    }
+
+    public pairwise(): Iter<[T, T]> {
+        const me = this;
+
+        function* f() {
+            let last = me.iter.next();
+            let next = me.iter.next();
+            while (!next.done) {
+                yield [last.value, next.value] as [T, T];
+                last = next;
+                next = me.iter.next();
             }
         }
         return new Iter(f());
@@ -437,7 +560,10 @@ export class Iter<T> implements IterableIterator<T> {
         function* f() {
             for (const i of iter) {
                 let j: any = i;
-                if (Array.isArray(j)) {
+                if(j === undefined) {
+                    yield j;
+                }
+                else if (Array.isArray(j)) {
                     for (const k of j) yield k;
                 }
                 else if (typeof j[Symbol.iterator] === 'function') {
@@ -514,7 +640,6 @@ export class Iter<T> implements IterableIterator<T> {
     }
 
     public chunk(size: number): Iter<Iter<T>> {
-
         const me = this;
         function* f() {
             let take = me.take(size).array();
@@ -526,18 +651,38 @@ export class Iter<T> implements IterableIterator<T> {
     }
 
     /**
-     * Converts an iterator to an array. Warning: Slow. 
+     * Converts an iterator to an array. 
+     * If the base collection is an array, the base collection will be returned. 
+     * If the base collection is an iterator, then the iterator will be fully materialized. 
+     * This will be slow and memory-intensive.
      * @returns 
      */
     public array(): T[] {
+        if (this.baseArray) {
+            if (this.currentLocation === undefined || this.currentLocation === 0) {
+                // collection not iterated yet. Just return the same array.
+                return this.baseArray;
+            }
+            else {
+                // collection has been iterated. Return a slice of the array.
+                return this.baseArray.slice(this.currentLocation);
+            }
+        }
         const arr: T[] = [];
         this.forEach(v => arr.push(v));
         return arr;
+    }
+
+    public restart(): Iter<T> {
+        if (!this.baseArray) {
+            throw Error("Cannot restart an iterator that is not based on an array.");
+        }
+        return Iter.from(this.baseArray);
     }
 }
 
 type Flat<Itr> = Itr extends Iter<infer Inner> ? Inner : Itr extends ArrayLike<infer Inner> ? Inner : Itr;
 
-export function iter<T>(arr: ArrayLike<T> | IterableIterator<T>) {
+export function iter<T>(arr: ArrayLike<T> | T[] | IterableIterator<T>) {
     return new Iter(arr);
 }

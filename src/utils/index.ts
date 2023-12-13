@@ -230,3 +230,10 @@ export function binarySearch<T>(
 
     return -1;
 }
+
+export type HexadecimalDigit = `${number}` | 'a' | 'b' | 'c' | 'd' | 'e' | 'f';
+
+export const hexValue = (digit: HexadecimalDigit): number => {
+    if(digit >= '0' && digit <= '9') return parseInt(digit);
+    return digit.charCodeAt(0) - 'a'.charCodeAt(0) + 10;
+}
