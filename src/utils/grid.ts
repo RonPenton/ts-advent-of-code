@@ -1,6 +1,7 @@
 export type Coord = [r: number, c: number];
 
 export const OrthogonalDirections = ['up', 'down', 'left', 'right'] as const;
+export type OrthogonalDirection = typeof OrthogonalDirections[number];
 export const Directions = ['up', 'upright', 'right', 'downright', 'down', 'downleft', 'left', 'upleft'] as const;
 export type Direction = typeof Directions[number];
 
@@ -354,6 +355,28 @@ export class Grid<T> {
     public * columns() {
         for (let c = 0; c < this.width; c++) {
             yield this.column(c);
+        }
+    }
+
+    public rank(rank: number, index: number) {
+        if (rank == 0) return this.row(index);
+        if (rank == 1) return this.column(index);
+        throw new Error(`Rank ${rank} is not supported`);
+    }
+
+    public * ranks(rank: number) {
+        if (rank == 0) {
+            for (let r = 0; r < this.height; r++) {
+                yield this.row(r);
+            }
+        }
+        else if (rank == 1) {
+            for (let c = 0; c < this.width; c++) {
+                yield this.column(c);
+            }
+        }
+        else {
+            throw new Error(`Rank ${rank} is not supported`);
         }
     }
 

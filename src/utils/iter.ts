@@ -360,6 +360,30 @@ export class Iter<T> implements IterableIterator<T> {
         return new Iter(f());
     }
 
+    /**
+     * Reverses the iterator
+     * The iterator is fully materialized so that it can be iterated over multiple times, 
+     * so careful about memory usage.
+     * @param other 
+     * @returns 
+     */
+    public reverse(): Iter<T> {
+        const me = this;
+        function* f() {
+            const cache: T[] = []
+            let next = me.iter.next();
+            while (!next.done) {
+                cache.push(next.value);
+                next = me.next();
+            }
+            for (let i = cache.length - 1; i >= 0; i--) {
+                yield cache[i];
+            }
+        }
+        return new Iter(f());
+    }
+
+
     public pairwise(): Iter<[T, T]> {
         const me = this;
 
@@ -560,7 +584,7 @@ export class Iter<T> implements IterableIterator<T> {
         function* f() {
             for (const i of iter) {
                 let j: any = i;
-                if(j === undefined) {
+                if (j === undefined) {
                     yield j;
                 }
                 else if (Array.isArray(j)) {
