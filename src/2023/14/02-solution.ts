@@ -90,6 +90,7 @@ for (; i < 1000000000; i++) {
         if (map.has(h)) {
             console.log(`cycle found at ${i}, val: ${map.get(h)}`);
             const cycleLength = i - map.get(h)!;
+            console.log(cycleLength);
             const left = 1000000000 - i;
             const cycles = Math.floor(left / cycleLength);
             i += cycles * cycleLength;
