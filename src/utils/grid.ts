@@ -16,7 +16,24 @@ export const Deltas: Record<Direction, Coord> = {
     'upleft': [-1, -1]
 };
 
-export const rotate = (dir: Direction, amt: -135 | -90 | -45 | 0 | 45 | 90 | 135 | 180) => {
+export const angles = [90, 45, 0, -45, -90, -135, 180, 135] as const;
+export type Angle = typeof angles[number];
+
+export const angleOfDirection = (dir: Direction): Angle => {
+    return angles[Directions.indexOf(dir)];
+}
+
+export const normalizeAngle = (a: number): Angle => {
+    if (a % 45 != 0) 
+        throw new Error(`Angle ${a} is not divisible by 45`);
+
+    while(a < -135) a += 360;
+    while(a > 180) a -= 360;
+    return a as Angle;
+}
+
+
+export const rotate = (dir: Direction, amt: Angle) => {
     return Directions[(Directions.indexOf(dir) + (amt / 45) + Directions.length) % Directions.length];
 }
 
@@ -245,7 +262,7 @@ export class Grid<T> {
     }
 
     public in([r, c]: Coord): boolean {
-        if (r < 0 || c < 0 || r > this.height || c > this.width)
+        if (r < 0 || c < 0 || r >= this.height || c >= this.width)
             return false;
         return true;
     }

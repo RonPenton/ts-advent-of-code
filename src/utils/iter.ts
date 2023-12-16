@@ -716,6 +716,22 @@ export class Iter<T> implements IterableIterator<T> {
         }
         return Iter.from(this.baseArray);
     }
+
+    public findCycle(keyFunc?: (t: T) => string): { start: number, length: number } | undefined {
+        keyFunc = keyFunc ? keyFunc : (t: T) => String(t);
+
+        const set = new Set<string>();
+        let idx = 0;
+        for (const a of this) {
+            const key = keyFunc(a);
+            if (set.has(key)) {
+                const start = this.findIndex(x => keyFunc!(x) === key);
+                return { start, length: idx - start };
+            }
+            set.add(key);
+            idx++;
+        }
+    }
 }
 
 type Flat<Itr> = Itr extends Iter<infer Inner> ? Inner : Itr extends ArrayLike<infer Inner> ? Inner : Itr;
