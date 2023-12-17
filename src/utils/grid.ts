@@ -41,8 +41,23 @@ export const oppositeDirection = (dir: Direction): Direction => {
     return rotate(dir, 180);
 }
 
-export const moveCoord = (c: Coord, dir: Direction): Coord => {
-    return addCoord(c, Deltas[dir]);
+export const moveCoord = (c: Coord, dir: Direction, scale = 1): Coord => {
+    return addCoord(c, scaleCoord(Deltas[dir], scale));
+}
+
+/**
+ * Rotate's a coordinate around the origin.
+ * Warning: A rounding operation is performed at the end to ensure an integral value.
+ * This may be undesirable in some cases.
+ * @param param0 
+ * @param amt 
+ * @returns 
+ */
+export const rotateCoord = ([r, c]: Coord, amt: Angle): Coord => {
+    const rad = (amt / 180) * Math.PI;
+    const sr = Math.sin(rad);
+    const cr = Math.cos(rad);
+    return [Math.round(c * sr + r * cr), Math.round(c * cr - r * sr)];
 }
 
 export const addCoord = ([r1, c1]: Coord, [r2, c2]: Coord): Coord => [r1 + r2, c1 + c2];
