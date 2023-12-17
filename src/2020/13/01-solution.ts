@@ -11,8 +11,6 @@ let t = time;
 while(true) {
     const bus = busses.find(x => t % x === 0);
     if(bus) {
-        console.log(bus);
-        console.log(t);
         console.log(bus * (t - time));
         break;
     }
