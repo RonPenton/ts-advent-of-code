@@ -611,6 +611,18 @@ export class Iter<T> implements IterableIterator<T> {
         return this.skip(1);
     }
 
+    public last(): T | undefined {
+        const me = this;
+
+        let last = me.iter.next();
+        let next = me.iter.next();
+        while (!next.done) {
+            last = next;
+            next = me.iter.next();
+        }
+        return last.value;
+    }
+
     public sort(comp: (a: T, b: T) => number): Iter<T> {
         const arr = this.array().sort(comp);
         return Iter.from(arr);
