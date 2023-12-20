@@ -1,5 +1,5 @@
 
-import { readLines, notEmpty, add } from "../../utils";
+import { readLines, notEmpty, add, defined } from "../../utils";
 import { Bitset, and, fromBinaryString, or, toBase10 } from "../../utils/bitset";
 
 const lines = readLines(`${__dirname}\\input.txt`);
@@ -34,9 +34,28 @@ function* parseInput(lines: string[]): Generator<BitMask | Instruction> {
     }
 }
 
+const computeAddresses = (address: Bitset, mask: MaskValue[]): Bitset[] => {
+    const indicies = mask.map((v, i) => v === 'X' ? i : undefined).filter(defined);
+    return computeIndex(address, indicies);
+}
+
+const computeIndex = (address: Bitset, [index, ...rest]: number[]): Bitset[] => {
+    if (index === undefined) return [address];
+    const a = address.slice();
+    a[index] = 0;
+    const b = address.slice();
+    b[index] = 1;
+    return [...computeIndex(a, rest), ...computeIndex(b, rest)];
+}
+
+const fill = (value: Bitset): Bitset => {
+    const pad = new Array(36 - value.length).fill(0);
+    return [...value, ...pad];
+}
+
 const instructions = [...parseInput(lines)];
 
-const memory = new Map<number, Bitset>();
+const memory = new Map<number, number>();
 let mask: BitMask = { mask: [], or: [] };
 
 for (const instruction of instructions) {
@@ -45,14 +64,16 @@ for (const instruction of instructions) {
     } else {
         const { address, value } = instruction;
         let a = fromBinaryString(address.toString(2));
+        a = fill(a);
         a = or(a, mask.or);
 
-
-
-        memory.set(instruction.address, value);
+        const addresses = computeAddresses(a, mask.mask);
+        for(const address of addresses) {
+            memory.set(toBase10(address), value);
+        }
     }
 }
 
-const numbers = [...memory.values()].map(toBase10).reduce(add, 0);
+const numbers = [...memory.values()].reduce(add, 0);
 
 console.log(numbers);
