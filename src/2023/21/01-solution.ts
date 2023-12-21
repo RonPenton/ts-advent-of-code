@@ -85,7 +85,7 @@ const bfs = (start: Coord, end: Coord) => {
         }
 
         const h = heuristic([current, dist, path]);
-        debug(`Examining: ${current}, dist: ${dist}, path: ${path.length}, heuristic: ${h}`, 1000);
+        //debug(`Examining: ${current}, dist: ${dist}, path: ${path.length}, heuristic: ${h}`, 1000);
 
         const cs = validMoves(grid, current);
         for (const c of cs) {
