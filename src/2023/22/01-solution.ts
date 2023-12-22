@@ -13,9 +13,6 @@ const parseLine = (line: string): Brick => {
 
 const bricks = lines.map(parseLine);
 
-const maxX = Math.max(...bricks.map(b => Math.max(b[0][0], b[1][0]))) + 1;
-const maxY = Math.max(...bricks.map(b => Math.max(b[0][1], b[1][1]))) + 1;
-
 const brickIntersects = (a: Brick) => (b: Brick) => {
     const [a1, a2] = a;
     const [b1, b2] = b;
@@ -65,8 +62,8 @@ const howManyCanFall = (bricks: Brick[]): number => {
 }
 
 while(fallCycle() > 0) {
-    sortedBricks.sort(sortBricks);  // not sure if this is necessary.
-    console.log('falling');
+    //sortedBricks.sort(sortBricks);  // not sure if this is necessary.
+    //console.log('falling');
 }
 
 console.log(howManyCanFall(sortedBricks));
