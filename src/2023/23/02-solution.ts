@@ -4,6 +4,7 @@ const startTime = Date.now();
 
 import { readLines, notEmpty } from "../../utils";
 import { Coord, Grid, OrthogonalDirections, eqCoord, moveCoord, parseCoord, printCoord } from "../../utils/grid";
+import { iter } from "../../utils/iter";
 
 const lines = readLines(`${__dirname}\\input.txt`).filter(notEmpty);
 
@@ -68,35 +69,36 @@ const getGraph = (start: Coord, end: Coord): Graph => {
     return graph;
 }
 
-const dfs = (graph: Graph, start: Coord, end: Coord): number => {
-    type State = [Coord, number];
-    const queue: State[] = [[start, 0]];
-    const visited = new Set<string>();
-    let max = 0
-    while (queue.length > 0) {
-        const [coord, d] = queue.pop()!;
-        const k = printCoord(coord);
-        if (d == -1) {
-            visited.delete(k);
-            continue;
+let max = 0;
+
+const dfs = (
+    graph: Graph,
+    start: Coord,
+    end: Coord,
+    dist: number = 0,
+    seen: Set<string> = new Set<string>): number => {
+
+    const k = printCoord(start);
+    if (eqCoord(start, end)) {
+        if (dist > max) {
+            console.log(`new max: ${dist}`);
+            max = dist;
         }
-        if (eqCoord(coord, end)) {
-            if (d > max) {
-                console.log(`new max: ${d}`);
-                max = Math.max(max, d);
-            }
-            continue;
-        }
-        if (visited.has(k))
-            continue;
-        visited.add(k)
-        queue.push([coord, -1]);
-        const edges = graph.get(k)!;
-        for (const [coordStr, dist] of edges.entries()) {
-            queue.push([parseCoord(coordStr), d + dist]);
-        }
+        return dist;
     }
-    return max;
+
+    if (seen.has(k))
+        return 0;
+
+    seen.add(k)
+    const edges = graph.get(k)!;
+    const results = iter(edges.entries())
+        .map(([coordStr, d]) => dfs(graph, parseCoord(coordStr), end, dist + d, seen))
+        .array();
+
+    seen.delete(k);
+
+    return Math.max(...results);
 }
 
 const g = getGraph(start, end);
