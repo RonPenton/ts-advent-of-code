@@ -110,9 +110,6 @@ const intersectXY = (a: Hailstone, b: Hailstone): BigCoord | undefined => {
 const solveForT = (a: Hailstone, b: BigCoord): Big => {
     const { location: [x1, y1], velocity: [vx1, vy1] } = a;
     const [x2, y2] = b;
-
-
-
     return vx1 == 0 ? y2.minus(y1).div(vy1) : x2.minus(x1).div(vx1);
 }
 
