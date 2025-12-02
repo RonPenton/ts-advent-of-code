@@ -54,10 +54,8 @@ const instructions = lines.filter(notEmpty).map(parseLine);
 
 let zeroes = 0;
 let position = start;
-let stop = 0;
 for (const instruction of instructions) {
     stop++;
-    if(stop > 5000000) break;
     const [newPosition, passedZero] = rotate(instruction, position);
     position = newPosition;
     zeroes += passedZero;
