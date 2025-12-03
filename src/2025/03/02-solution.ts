@@ -17,7 +17,7 @@ const getMaxJoltage = (bank: Bank, digits: number, value: number): number => {
 
     value = value * 10 + max;
 
-    if(digits === 0)        return value;
+    if (digits === 0) return value;
 
     const index = bank.indexOf(max);
     const rest = bank.slice(index + 1);
