@@ -190,6 +190,15 @@ export class Grid<T> {
         return vals;
     }
 
+    public filterCoord(predicate: (value: T, coord: Coord, g: Grid<T>) => boolean): GridEntry<T>[]
+    public filterCoord<S extends T>(predicate: (value: T, coord: Coord, g: Grid<T>) => value is S): GridEntry<S>[] {
+        const vals: GridEntry<S>[] = [];
+        this.grid.forEach((row, r) => row.forEach((val, c) => {
+            if (predicate(val, [r, c], this)) vals.push({ coord: [r, c], val });
+        }));
+        return vals;
+    }
+
     public find(predicate: (value: T, r: number, c: number, g: Grid<T>) => boolean): GridEntry<T> | undefined
     public find<S extends T>(predicate: (value: T, r: number, c: number, g: Grid<T>) => value is S): GridEntry<S> | undefined {
         let coord: Coord | undefined = undefined;
