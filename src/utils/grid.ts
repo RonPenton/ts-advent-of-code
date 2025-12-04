@@ -24,11 +24,11 @@ export const angleOfDirection = (dir: Direction): Angle => {
 }
 
 export const normalizeAngle = (a: number): Angle => {
-    if (a % 45 != 0) 
+    if (a % 45 != 0)
         throw new Error(`Angle ${a} is not divisible by 45`);
 
-    while(a < -135) a += 360;
-    while(a > 180) a -= 360;
+    while (a < -135) a += 360;
+    while (a > 180) a -= 360;
     return a as Angle;
 }
 
@@ -129,6 +129,7 @@ export const wrapCoord = (r1: number, c1: number, r2: number, c2: number) => ([r
 }
 
 export type GridPredicate<T, R = void> = (val: T, r: number, c: number, g: Grid<T>) => R;
+export type GridPredicateCoord<T, R = void> = (val: T, c: Coord, g: Grid<T>) => R;
 
 export type GridEntry<T> = {
     coord: Coord,
@@ -174,6 +175,10 @@ export class Grid<T> {
 
     public map<U>(callbackfn: GridPredicate<T, U>): Grid<U> {
         return new Grid(this.grid.map((row, r) => row.map((val, c) => callbackfn(val, r, c, this))));
+    }
+
+    public mapCoord<U>(callbackfn: GridPredicateCoord<T, U>): Grid<U> {
+        return new Grid(this.grid.map((row, r) => row.map((val, c) => callbackfn(val, [r, c], this))));
     }
 
     public filter(predicate: (value: T, r: number, c: number, g: Grid<T>) => boolean): GridEntry<T>[]
