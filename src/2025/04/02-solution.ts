@@ -19,16 +19,15 @@ const canRemove = (c: Coord) => {
     return false;
 }
 
-const remove = (c: Coord) => grid.set(c, 'x');
-
 let removed = 0;
+const remove = (c: Coord) => {
+    grid.set(c, 'x');
+    removed++;
+}
 
 while (true) {
     const lastRemoved = removed;
-    grid.filterCoord((_, c) => canRemove(c)).forEach(({ coord }) => {
-        remove(coord);
-        removed++;
-    });
+    grid.filterCoord((_, c) => canRemove(c)).forEach(({ coord }) => remove(coord));
     if (removed === lastRemoved) break;
 }
 
